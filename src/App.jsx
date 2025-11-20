@@ -4,6 +4,8 @@ import Home from "./pages/Home";
 import Clientes from "./pages/Clientes";
 import Articulos from "./pages/Articulos";
 import Representantes from "./pages/Representantes";
+import './App.css';
+
 
 function App() {
   return (
