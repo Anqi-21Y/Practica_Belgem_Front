@@ -14,6 +14,7 @@ function App() {
           <Route path="/clientes" element={<Clientes />} />
           <Route path="/articulos" element={<Articulos />} />
           <Route path="/representantes" element={<Representantes />} />
+          <Route path="/Divisas" element={<Divisas/>} />
         </Routes>
       </Layout>
     </BrowserRouter>
