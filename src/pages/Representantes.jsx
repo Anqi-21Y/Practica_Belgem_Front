@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Eye, Edit2, Trash2, Search } from 'lucide-react';
+import './representantes.css';
 
 
 export default function ListaRepresentantes() {
@@ -65,8 +66,8 @@ export default function ListaRepresentantes() {
   // y solo aparece cuando el usuario hace clic en "+ Nuevo Representante" o en el botón de edición.
   const[showForm , setShowForm ] = useState(false);
 
-  const fielteredRepresentantes = setRepresentantes.filter(rep => 
-    rep.nombre.toLowerCase().includes(search.toLowerCase()) || 
+  const filteredRepresentantes = representantes.filter(rep =>
+    rep.nombre.toLowerCase().includes(search.toLowerCase()) ||
     rep.email.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -88,7 +89,7 @@ export default function ListaRepresentantes() {
 
   const handleDelete = (id) => {
     if(window.confirm('¿ Estás seguro de eliminar este representante ?')){
-      setRepresentantes(representantes.filter(rep => rep.id !=id));
+      setRepresentantes(representantes.filter(rep => rep.id !== id));
     }
   };
 
@@ -131,7 +132,6 @@ export default function ListaRepresentantes() {
   return (
     <div className="container">
 
-      // parte de search
       <div className="header">
         <h1>Listado de Representantes</h1>
         <button className="btn_nuevo" onClick={handleNew}> + Nuevo Representante</button>
@@ -139,7 +139,7 @@ export default function ListaRepresentantes() {
 
 
       <div className="search">
-        <search className="icon_search" />
+        <Search className="icon_search" />
         <input type="text" placeholder="Buscar por nombre o email" value={search} onChange={(e) => setSearch(e.target.value)} className="search_input"/>
       </div>
 
@@ -154,7 +154,7 @@ export default function ListaRepresentantes() {
           </tr>
         </thead>
         <tbody>
-          {fielteredRepresentantes.map(rep => (
+          {filteredRepresentantes.map(rep => (
             <tr key={rep.id}>
               <td>{rep.nombre}</td>
               <td>{rep.email}</td>
