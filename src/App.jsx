@@ -5,6 +5,8 @@ import Clientes from "./pages/Clientes";
 import Articulos from "./pages/Articulos";
 import Representantes from "./pages/Representantes";
 import Divisas from "./pages/Divisas";
+import NuevaDivisa from "./pages/NuevaDivisa";
+import EditarDivisa from "./pages/EditarDivisa";
 
 function App() {
   return (
@@ -16,6 +18,9 @@ function App() {
           <Route path="/articulos" element={<Articulos />} />
           <Route path="/representantes" element={<Representantes />} />
           <Route path="/divisas" element={<Divisas />} />
+          <Route path="/divisas/nueva" element={<NuevaDivisa />} />
+          <Route path="/divisas/editar/:id" element={<EditarDivisa />} />
+         
         </Routes>
       </Layout>
     </BrowserRouter>
