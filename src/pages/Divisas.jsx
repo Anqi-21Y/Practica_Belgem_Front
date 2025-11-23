@@ -7,7 +7,7 @@ export default function Divisas() {
     ]
   return (
     
-  
+   
   <section id="divisas">
     <h1>Lista de  Divisas</h1>
     <p> esto es un parrafo de divisas</p>
