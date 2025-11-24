@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Eye, Edit2, Trash2, Search } from 'lucide-react';
+import { Home, Package, Users, DollarSign, Menu, Bell, User } from 'lucide-react';
 import './representantes.css';
 
 
@@ -7,6 +8,8 @@ export default function ListaRepresentantes() {
 
   //Inicializar el estado del cuadro de búsqueda a una cadena vacía
   const [search, setSearch] = useState('');
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   //datos de la lista(iniciar la lista y guardar todos los datos de repres)
   const[representantes , setRepresentantes ] = useState([
@@ -39,7 +42,7 @@ export default function ListaRepresentantes() {
       nombre: 'Ana Fernández Torres',
       email: 'ana.fernandez@empresa.com',
       zona: 'Valencia',
-      comision: '5.25%'
+      comision: '5.25'
     },
 
     {
@@ -47,7 +50,7 @@ export default function ListaRepresentantes() {
       nombre: 'María López Martínez',
       email: 'maria.lopez@empresa.com',
       zona: 'Aragón',
-      comision: '5.25%'
+      comision: '5.25'
     },
 
   ]);
@@ -130,81 +133,128 @@ export default function ListaRepresentantes() {
 
 
   return (
-    <div className="container">
 
-      <div className="header">
-        <h1>Listado de Representantes</h1>
-        <button className="btn_nuevo" onClick={handleNew}> + Nuevo Representante</button>
+    <div className="layout_Repre">
+
+
+      {/* Main */}
+      <div className="main">
+        <header className="header">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="icon-btn">
+            <Menu size={24} />
+          </button>
+
+          <div className="header-right">
+            <button className="icon-btn notification">
+              <Bell size={20} />
+              <span className="dot"></span>
+            </button>
+            <button className="icon-btn">
+              <User size={20} />
+            </button>
+          </div>
+        </header>
+
+        <main className="content">
+          <div className="content-header">
+            <h1>Listado de Representantes</h1>
+            <button className="btn-green" onClick={handleNew}>+ Nuevo Representante</button>
+          </div>
+
+          {/* Search */}
+          <div className="search-box">
+            <Search className="search-icon" />
+            <input
+              type="text"
+              placeholder="Buscar por nombre o email"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          {/* Table */}
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Zona</th>
+                  <th>Comisión</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRepresentantes.map(rep => (
+                  <tr key={rep.id}>
+                    <td>{rep.nombre}</td>
+                    <td>{rep.email}</td>
+                    <td>{rep.zona}</td>
+                    <td>{rep.comision}</td>
+                    <td>
+                      <button className="btn-action blue" onClick={() => handleView(rep.id)}>
+                        <Eye size={18} />
+                      </button>
+                      <button className="btn-action yellow" onClick={() => handleEdit(rep.id)}>
+                        <Edit2 size={18} />
+                      </button>
+                      <button className="btn-action red" onClick={() => handleDelete(rep.id)}>
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {filteredRepresentantes.length === 0 && (
+              <div className="no-data">No se encontraron representantes</div>
+            )}
+          </div>
+
+          {/* Modal */}
+          {showForm && (
+            <div className="modal-overlay">
+              <div className="modal">
+                <h2>{formData.id ? "Editar Representante" : "Nuevo Representante"}</h2>
+
+                <form onSubmit={handleFormSubmit} className="form-grid">
+                  <label>ID Empleado</label>
+                  <input name="id" value={formData.id} onChange={handleInputChange} required />
+
+                  <label>Nombre Completo</label>
+                  <input name="nombre" value={formData.nombre} onChange={handleInputChange} required />
+
+                  <label>Email</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleInputChange} required />
+
+                  <label>Zona</label>
+                  <input name="zona" value={formData.zona} onChange={handleInputChange} required />
+
+                  <label>Comisión</label>
+                  <input name="comision" value={formData.comision} onChange={handleInputChange} required />
+
+                  <div className="form-buttons">
+                    <button
+                      type="button"
+                      className="btn-cancel"
+                      onClick={() => setShowForm(false)}
+                    >
+                      Cancelar
+                    </button>
+
+                    <button type="submit" className="btn-blue">
+                      Guardar Representante
+                    </button>
+                  </div>
+                </form>
+
+              </div>
+            </div>
+          )}
+
+        </main>
       </div>
-
-
-      <div className="search">
-        <Search className="icon_search" />
-        <input type="text" placeholder="Buscar por nombre o email" value={search} onChange={(e) => setSearch(e.target.value)} className="search_input"/>
-      </div>
-
-      <table className="tabla_representantes">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Zona</th>
-            <th>Comisión</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredRepresentantes.map(rep => (
-            <tr key={rep.id}>
-              <td>{rep.nombre}</td>
-              <td>{rep.email}</td>
-              <td>{rep.zona}</td>
-              <td>{rep.comision}</td>
-              <td>
-                <button onClick={() => handleView(rep.id)} title="Ver"><Eye size={18} /></button>
-                <button onClick={() => handleEdit(rep.id)} title="Editar"><Edit2 size={18} /></button>
-                <button onClick={() => handleDelete(rep.id)} title="Eliminar"><Trash2 size={18} /></button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {filteredRepresentantes.length === 0 && <div className="no-results">No se encontraron representantes</div>}
-
-
-      {showForm && (
-        <div className="form-container">
-          <h2>{formData.id ? 'Editar Representante' : 'Nuevo Representante'}</h2>
-          <form onSubmit={handleFormSubmit}>
-            <div className="form-group">
-              <label>ID Empleado:</label>
-              <input type="text" name="id" value={formData.id} onChange={handleInputChange} required />
-            </div>
-            <div className="form-group">
-              <label>Nombre Completo:</label>
-              <input type="text" name="nombre" value={formData.nombre} onChange={handleInputChange} required />
-            </div>
-            <div className="form-group">
-              <label>Email:</label>
-              <input type="email" name="email" value={formData.email} onChange={handleInputChange} required />
-            </div>
-            <div className="form-group">
-              <label>Zona:</label>
-              <input type="text" name="zona" value={formData.zona} onChange={handleInputChange} required />
-            </div>
-            <div className="form-group">
-              <label>Comisión:</label>
-              <input type="text" name="comision" value={formData.comision} onChange={handleInputChange} required />
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="btn-guardar">Guardar</button>
-              <button type="button" className="btn-cancelar" onClick={() => setShowForm(false)}>Cancelar</button>
-            </div>
-          </form>
-        </div>
-      )}
-      
     </div>
   );
 }
