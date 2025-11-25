@@ -5,6 +5,8 @@ import Clientes from "./pages/Clientes";
 import Articulos from "./pages/Articulos";
 import Representantes from "./pages/Representantes";
 import './App.css';
+import DivisasPage from "./pages/Divisas";
+import ClientesPage from "./pages/Clientes";
 
 
 function App() {
@@ -13,9 +15,10 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/clientes" element={<Clientes />} />
+          <Route path="/clientes" element={<ClientesPage />} />
           <Route path="/articulos" element={<Articulos />} />
           <Route path="/representantes" element={<Representantes />} />
+          <Route path="/divisas" element={<DivisasPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>
