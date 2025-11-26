@@ -4,6 +4,8 @@ import Home from "./pages/Home";
 import Clientes from "./pages/Clientes";
 import Articulos from "./pages/Articulos";
 import Representantes from "./pages/Representantes";
+import Divisas from "./pages/Divisas";
+import './App.css';
 import './App.css';
 import DivisasPage from "./pages/Divisas";
 import ClientesPage from "./pages/Clientes";
