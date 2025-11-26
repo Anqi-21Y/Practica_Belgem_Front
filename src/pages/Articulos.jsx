@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Search, X, Home, Bell, User, Menu, Layers } from 'lucide-react';
 
-const App = () => {
+const Articulos = () => {
   const [productos, setProductos] = useState([
     { id: '1', nombre: 'Producto A', cantidad: 10, dto: 5, precio: 100 },
     { id: '2', nombre: 'Producto B', cantidad: 5, dto: 0, precio: 50 },
