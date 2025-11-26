@@ -5,6 +5,7 @@ import Clientes from "./pages/Clientes";
 import Articulos from "./pages/Articulos";
 import Representantes from "./pages/Representantes";
 import Divisas from "./pages/Divisas";
+import './App.css';
 
 function App() {
   return (
