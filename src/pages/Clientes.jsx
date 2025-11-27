@@ -18,7 +18,9 @@ const handleResponse = async (response) => {
   if (response.status === 204) {
     return null;
   }
-  return response.json();
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
 };
 
 // Servicio de Cliente integrado
@@ -59,7 +61,7 @@ const ClienteService = {
       headers: getHeaders(),
       body: JSON.stringify(requestBody)
     });
-    
+
     return await handleResponse(response);
   },
 
@@ -82,7 +84,7 @@ const ClienteService = {
       headers: getHeaders(),
       body: JSON.stringify(requestBody)
     });
-    
+
     return await handleResponse(response);
   },
 
@@ -91,7 +93,7 @@ const ClienteService = {
       method: 'DELETE',
       headers: getHeaders()
     });
-    
+
     return await handleResponse(response);
   }
 };
@@ -99,7 +101,7 @@ const ClienteService = {
 // Mapeo de respuesta del backend a formato frontend
 const mapClienteFromBackend = (cliente) => {
   if (!cliente) return null;
-  
+
   return {
     id: cliente.idCliente,
     nombre: cliente.nombre,
@@ -124,7 +126,7 @@ const ClientesPage = () => {
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     id: '',
     ciudad: '',
@@ -185,7 +187,7 @@ const ClientesPage = () => {
     const confirmDelete = window.confirm(
       `¿Estás seguro de que deseas eliminar el cliente "${cliente.nombre}"?\n\nEsta acción no se puede deshacer.`
     );
-    
+
     if (confirmDelete) {
       setLoading(true);
       setError(null);
@@ -238,7 +240,7 @@ const ClientesPage = () => {
         await ClienteService.crearCliente(formData);
         alert('Cliente creado correctamente');
       }
-      
+
       await cargarClientes();
       setViewMode('list');
       setSelectedClient(null);
@@ -267,7 +269,7 @@ const ClientesPage = () => {
   );
 
   const getTitle = () => {
-    switch(viewMode) {
+    switch (viewMode) {
       case 'view': return `Detalles del Cliente`;
       case 'edit': return 'Editar Cliente';
       case 'create': return 'Nuevo Cliente';
@@ -317,7 +319,7 @@ const ClientesPage = () => {
       maxWidth: '896px'
     }}>
       {error && <ErrorAlert message={error} />}
-      
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
         {[
           { label: 'Nombre *', field: 'nombre', placeholder: 'Juan Pérez' },
@@ -346,13 +348,14 @@ const ClientesPage = () => {
                 borderRadius: '8px',
                 outline: 'none',
                 boxSizing: 'border-box',
-                backgroundColor: (disabled || loading) ? '#f3f4f6' : 'white'
+                backgroundColor: (disabled || loading) ? '#f3f4f6' : 'white',
+                color: '#000000'
               }}
               placeholder={placeholder}
             />
           </div>
         ))}
-        
+
         <div>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
             Tipo Cliente
@@ -368,7 +371,8 @@ const ClientesPage = () => {
               borderRadius: '8px',
               outline: 'none',
               boxSizing: 'border-box',
-              backgroundColor: loading ? '#f3f4f6' : 'white'
+              backgroundColor: loading ? '#f3f4f6' : 'white',
+              color: '#000000'
             }}
           >
             <option value="">Seleccionar...</option>
@@ -396,7 +400,8 @@ const ClientesPage = () => {
               boxSizing: 'border-box',
               fontFamily: 'inherit',
               resize: 'vertical',
-              backgroundColor: loading ? '#f3f4f6' : 'white'
+              backgroundColor: loading ? '#f3f4f6' : 'white',
+              color: '#000000'
             }}
             placeholder="Notas adicionales sobre el cliente..."
           />
@@ -502,7 +507,7 @@ const ClientesPage = () => {
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
           {error && viewMode === 'list' && <ErrorAlert message={error} />}
-          
+
           {loading && viewMode === 'list' ? (
             <LoadingSpinner />
           ) : viewMode === 'list' ? (
@@ -511,7 +516,7 @@ const ClientesPage = () => {
                 <div style={{ position: 'relative', flexGrow: 1, minWidth: '250px' }}>
                   <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
                   <input type="text" placeholder="Buscar clientes..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ paddingLeft: '40px', padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
+                    style={{ paddingLeft: '40px', padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box', color: '#000000' }} />
                 </div>
                 <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap' }}>
                   <Plus size={20} />Nuevo Cliente
@@ -547,9 +552,11 @@ const ClientesPage = () => {
                           <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.telefono}</td>
                           <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.ciudad}</td>
                           <td style={{ padding: '16px 24px' }}>
-                            <span style={{ padding: '4px 8px', fontSize: '12px', fontWeight: '600', borderRadius: '9999px',
+                            <span style={{
+                              padding: '4px 8px', fontSize: '12px', fontWeight: '600', borderRadius: '9999px',
                               backgroundColor: cliente.tipo_cliente === 'Premium' ? '#f3e8ff' : cliente.tipo_cliente === 'Corporativo' ? '#dbeafe' : '#f3f4f6',
-                              color: cliente.tipo_cliente === 'Premium' ? '#7c3aed' : cliente.tipo_cliente === 'Corporativo' ? '#2563eb' : '#4b5563' }}>
+                              color: cliente.tipo_cliente === 'Premium' ? '#7c3aed' : cliente.tipo_cliente === 'Corporativo' ? '#2563eb' : '#4b5563'
+                            }}>
                               {cliente.tipo_cliente}
                             </span>
                           </td>
@@ -573,9 +580,11 @@ const ClientesPage = () => {
                 <>
                   <div style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '2px solid #e5e7eb' }}>
                     <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>{selectedClient?.nombre}</h2>
-                    <span style={{ padding: '6px 12px', fontSize: '14px', fontWeight: '600', borderRadius: '9999px',
+                    <span style={{
+                      padding: '6px 12px', fontSize: '14px', fontWeight: '600', borderRadius: '9999px',
                       backgroundColor: selectedClient?.tipo_cliente === 'Premium' ? '#f3e8ff' : selectedClient?.tipo_cliente === 'Corporativo' ? '#dbeafe' : '#f3f4f6',
-                      color: selectedClient?.tipo_cliente === 'Premium' ? '#7c3aed' : selectedClient?.tipo_cliente === 'Corporativo' ? '#2563eb' : '#4b5563' }}>
+                      color: selectedClient?.tipo_cliente === 'Premium' ? '#7c3aed' : selectedClient?.tipo_cliente === 'Corporativo' ? '#2563eb' : '#4b5563'
+                    }}>
                       {selectedClient?.tipo_cliente}
                     </span>
                   </div>

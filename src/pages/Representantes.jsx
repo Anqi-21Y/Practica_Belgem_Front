@@ -57,7 +57,7 @@ const RepresentantesService = {
       headers: getHeaders(),
       body: JSON.stringify(requestBody)
     });
-    
+
     return await handleResponse(response);
   },
 
@@ -76,7 +76,7 @@ const RepresentantesService = {
       headers: getHeaders(),
       body: JSON.stringify(requestBody)
     });
-    
+
     return await handleResponse(response);
   },
 
@@ -85,7 +85,7 @@ const RepresentantesService = {
       method: 'DELETE',
       headers: getHeaders()
     });
-    
+
     return await handleResponse(response);
   }
 };
@@ -93,7 +93,7 @@ const RepresentantesService = {
 // Mapeo de respuesta del backend a formato frontend
 const mapRepresentanteFromBackend = (representante) => {
   if (!representante) return null;
-  
+
   return {
     id: representante.idRepresentante,
     codigo_interno: representante.codigoInterno,
@@ -188,7 +188,7 @@ export default function ListaRepresentantes() {
         setLoading(true);
         await RepresentanteService.eliminarRepresentante(id);
         await cargarRepresentantes();
-        
+
         // Si estábamos viendo ese representante, volver a la lista
         if (selectedRep?.id === id) {
           handleCancel();
@@ -234,7 +234,7 @@ export default function ListaRepresentantes() {
 
     try {
       setLoading(true);
-      
+
       // Preparar datos para enviar al backend
       const dataToSend = {
         name: formData.name,
@@ -418,7 +418,7 @@ export default function ListaRepresentantes() {
         </header>
 
         {/* Content */}
-        <div style={{ flex: 1, overflow: "auto", padding: "24px"}}>
+        <div style={{ flex: 1, overflow: "auto", padding: "24px" }}>
           {/* Mostrar error si existe */}
           {error && (
             <div style={{ backgroundColor: "#fee2e2", border: "1px solid #ef4444", color: "#991b1b", padding: "16px", borderRadius: "8px", marginBottom: "16px" }}>
@@ -437,7 +437,7 @@ export default function ListaRepresentantes() {
                     placeholder="Buscar representantes..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    style={{ paddingLeft: "40px", padding: "8px 16px", border: "1px solid #d1d5db", borderRadius: "8px", outline: "none", width: "300px" }}
+                    style={{ paddingLeft: "40px", padding: "8px 16px", border: "1px solid #d1d5db", borderRadius: "8px", outline: "none", width: "300px", color: "#000000" }}
                   />
                 </div>
 
@@ -548,7 +548,7 @@ export default function ListaRepresentantes() {
 
           {/* Formulario */}
           {viewMode === "form" && (
-            <div style={{ backgroundColor: "white", borderRadius: "8px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", padding: "32px", maxWidth: "800px"}}>
+            <div style={{ backgroundColor: "white", borderRadius: "8px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", padding: "32px", maxWidth: "800px" }}>
               <form onSubmit={handleFormSubmit} style={{ display: "grid", gap: "16px" }}>
                 <div>
                   <label style={{ fontWeight: "700", fontSize: "14px", marginBottom: "4px", display: "block" }}>
@@ -560,7 +560,7 @@ export default function ListaRepresentantes() {
                     onChange={handleInputChange}
                     placeholder={placeholders.name}
                     required
-                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none" }}
+                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", color: "#000000" }}
                   />
                 </div>
 
@@ -574,7 +574,7 @@ export default function ListaRepresentantes() {
                     onChange={handleInputChange}
                     placeholder={placeholders.phone}
                     required
-                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none" }}
+                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", color: "#000000" }}
                   />
                 </div>
 
@@ -588,7 +588,7 @@ export default function ListaRepresentantes() {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder={placeholders.email}
-                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none" }}
+                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", color: "#000000" }}
                   />
                 </div>
 
@@ -602,7 +602,7 @@ export default function ListaRepresentantes() {
                     onChange={handleInputChange}
                     placeholder={placeholders.zone}
                     required
-                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none" }}
+                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", color: "#000000" }}
                   />
                 </div>
 
@@ -616,7 +616,7 @@ export default function ListaRepresentantes() {
                     onChange={handleInputChange}
                     placeholder={placeholders.internalCode}
                     required
-                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none" }}
+                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", color: "#000000" }}
                   />
                 </div>
 
@@ -631,37 +631,37 @@ export default function ListaRepresentantes() {
                     value={formData.commission}
                     onChange={handleInputChange}
                     placeholder={placeholders.commission}
-                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none" }}
+                    style={{ width: "80%", maxWidth: "600px", padding: "8px 16px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", color: "#000000" }}
                   />
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "16px" }}>
-                  <button 
-                    type="button" 
-                    onClick={handleCancel} 
+                  <button
+                    type="button"
+                    onClick={handleCancel}
                     disabled={loading}
-                    style={{ 
-                      padding: "8px 24px", 
-                      border: "1px solid #d1d5db", 
-                      borderRadius: "8px", 
-                      backgroundColor: "white", 
-                      cursor: loading ? "not-allowed" : "pointer", 
-                      fontWeight: "500" 
+                    style={{
+                      padding: "8px 24px",
+                      border: "1px solid #d1d5db",
+                      borderRadius: "8px",
+                      backgroundColor: "white",
+                      cursor: loading ? "not-allowed" : "pointer",
+                      fontWeight: "500"
                     }}
                   >
                     Cancelar
                   </button>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     disabled={loading}
-                    style={{ 
-                      padding: "8px 24px", 
-                      backgroundColor: loading ? "#9ca3af" : "#4f46e5", 
-                      color: "white", 
-                      border: "none", 
-                      borderRadius: "8px", 
-                      cursor: loading ? "not-allowed" : "pointer", 
-                      fontWeight: "500" 
+                    style={{
+                      padding: "8px 24px",
+                      backgroundColor: loading ? "#9ca3af" : "#4f46e5",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: loading ? "not-allowed" : "pointer",
+                      fontWeight: "500"
                     }}
                   >
                     {loading ? "Guardando..." : "Guardar"}

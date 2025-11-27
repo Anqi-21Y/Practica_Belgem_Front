@@ -11,7 +11,7 @@ const Articulos = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('list'); // 'list', 'view', 'create', 'edit'
   const [selectedProduct, setSelectedProduct] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     id: '',
     nombre: '',
@@ -62,7 +62,7 @@ const Articulos = () => {
     const confirmDelete = window.confirm(
       `¿Estás seguro de que deseas eliminar el producto "${producto.nombre}"?\n\nEsta acción no se puede deshacer.`
     );
-    
+
     if (confirmDelete) {
       setLoading(true);
       setError(null);
@@ -96,7 +96,7 @@ const Articulos = () => {
         await ArticulosService.create(formData);
         alert('Producto creado correctamente');
       }
-      
+
       await cargarProductos();
       setViewMode('list');
       setSelectedProduct(null);
@@ -124,7 +124,7 @@ const Articulos = () => {
   );
 
   const getTitle = () => {
-    switch(viewMode) {
+    switch (viewMode) {
       case 'edit': return 'Editar Producto';
       case 'create': return 'Nuevo Producto';
       default: return 'Artículos';
@@ -168,34 +168,34 @@ const Articulos = () => {
     setLoading(true);
     setError(null);
     try {
-    const data = await ArticulosService.getById(producto.id);
-    const articuloMapeado = mapArticuloFromBackend(data);
-    setSelectedProduct(articuloMapeado);
-    setViewMode('view');
+      const data = await ArticulosService.getById(producto.id);
+      const articuloMapeado = mapArticuloFromBackend(data);
+      setSelectedProduct(articuloMapeado);
+      setViewMode('view');
     } catch (err) {
-    setError('Error al obtener el artículo: ' + err.message);
-    console.error(err);
+      setError('Error al obtener el artículo: ' + err.message);
+      console.error(err);
     } finally {
-    setLoading(false);
+      setLoading(false);
     }
   };
 
 
   const renderView = () => (
     <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '24px', maxWidth: '600px', margin: '0 auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-    <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Detalles del Artículo</h2>
+      <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Detalles del Artículo</h2>
 
 
-    <p><strong>ID:</strong> {selectedProduct.id}</p>
-    <p><strong>Nombre:</strong> {selectedProduct.nombre}</p>
-    <p><strong>Cantidad:</strong> {selectedProduct.cantidad}</p>
-    <p><strong>Descuento:</strong> {selectedProduct.dto}%</p>
-    <p><strong>Precio:</strong> {selectedProduct.precio} €</p>
+      <p><strong>ID:</strong> {selectedProduct.id}</p>
+      <p><strong>Nombre:</strong> {selectedProduct.nombre}</p>
+      <p><strong>Cantidad:</strong> {selectedProduct.cantidad}</p>
+      <p><strong>Descuento:</strong> {selectedProduct.dto}%</p>
+      <p><strong>Precio:</strong> {selectedProduct.precio} €</p>
 
 
-    <button onClick={() => setViewMode('list')} style={{ marginTop: '24px', padding: '8px 16px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-    Volver
-    </button>
+      <button onClick={() => setViewMode('list')} style={{ marginTop: '24px', padding: '8px 16px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+        Volver
+      </button>
     </div>
   );
 
@@ -210,7 +210,7 @@ const Articulos = () => {
       margin: '0 auto'
     }}>
       {error && <ErrorAlert message={error} />}
-      
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
         {selectedProduct && (
           <div>
@@ -227,12 +227,12 @@ const Articulos = () => {
                 border: '1px solid #d1d5db',
                 borderRadius: '8px',
                 backgroundColor: '#f3f4f6',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                color: '#000000'
               }}
             />
           </div>
         )}
-        
         <div>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
             Nombre del Producto *
@@ -360,7 +360,7 @@ const Articulos = () => {
           {loading ? 'Guardando...' : 'Guardar Cambios'}
         </button>
       </div>
-    </div>
+    </div >
   );
 
   return (
@@ -425,18 +425,18 @@ const Articulos = () => {
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
           {error && viewMode === 'list' && <ErrorAlert message={error} />}
-          
+
           {loading && viewMode === 'list' ? (
             <LoadingSpinner />
           ) : viewMode === 'view' ? (
-            renderView ()
-          ) : viewMode === 'list' ?(
+            renderView()
+          ) : viewMode === 'list' ? (
             <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
               <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ position: 'relative', flexGrow: 1, minWidth: '250px' }}>
                   <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
                   <input type="text" placeholder="Buscar productos..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ paddingLeft: '40px', padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
+                    style={{ paddingLeft: '40px', padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box', color: '#000000' }} />
                 </div>
                 <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap' }}>
                   <Plus size={20} />Nuevo Producto

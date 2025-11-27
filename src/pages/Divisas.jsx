@@ -18,7 +18,9 @@ const handleResponse = async (response) => {
   if (response.status === 204) {
     return null;
   }
-  return response.json();
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
 };
 
 // Servicio de Divisas integrado
@@ -50,7 +52,7 @@ const DivisasService = {
       headers: getHeaders(),
       body: JSON.stringify(requestBody)
     });
-    
+
     return await handleResponse(response);
   },
 
@@ -65,7 +67,7 @@ const DivisasService = {
       headers: getHeaders(),
       body: JSON.stringify(requestBody)
     });
-    
+
     return await handleResponse(response);
   },
 
@@ -74,7 +76,7 @@ const DivisasService = {
       method: 'DELETE',
       headers: getHeaders()
     });
-    
+
     return await handleResponse(response);
   }
 };
@@ -82,7 +84,7 @@ const DivisasService = {
 // Mapeo de respuesta del backend a formato frontend
 const mapDivisaFromBackend = (divisa) => {
   if (!divisa) return null;
-  
+
   return {
     id: divisa.id,
     code: divisa.code,
@@ -98,7 +100,7 @@ const DivisasPage = () => {
   const [divisas, setDivisas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     id: '',
     code: '',
@@ -150,7 +152,7 @@ const DivisasPage = () => {
     const confirmDelete = window.confirm(
       `¿Estás seguro de que deseas eliminar la divisa "${divisa.name}"?\n\nEsta acción no se puede deshacer.`
     );
-    
+
     if (confirmDelete) {
       setLoading(true);
       setError(null);
@@ -194,7 +196,7 @@ const DivisasPage = () => {
         await DivisasService.crearDivisa(formData);
         alert('Divisa creada correctamente');
       }
-      
+
       await cargarDivisas();
       setViewMode('list');
       setSelectedDivisa(null);
@@ -222,7 +224,7 @@ const DivisasPage = () => {
   );
 
   const getTitle = () => {
-    switch(viewMode) {
+    switch (viewMode) {
       case 'view': return `Detalles de la Divisa`;
       case 'edit': return 'Editar Divisa';
       case 'create': return 'Nueva Divisa';
@@ -272,7 +274,7 @@ const DivisasPage = () => {
       maxWidth: '600px'
     }}>
       {error && <ErrorAlert message={error} />}
-      
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
@@ -291,7 +293,8 @@ const DivisasPage = () => {
               borderRadius: '8px',
               outline: 'none',
               boxSizing: 'border-box',
-              backgroundColor: loading ? '#f3f4f6' : 'white'
+              backgroundColor: loading ? '#f3f4f6' : 'white',
+              color: '#000000'
             }}
             placeholder="EUR"
           />
@@ -316,7 +319,8 @@ const DivisasPage = () => {
               borderRadius: '8px',
               outline: 'none',
               boxSizing: 'border-box',
-              backgroundColor: loading ? '#f3f4f6' : 'white'
+              backgroundColor: loading ? '#f3f4f6' : 'white',
+              color: '#000000'
             }}
             placeholder="EURO"
           />
@@ -375,7 +379,7 @@ const DivisasPage = () => {
             <Menu size={20} />
           </button>
         </div>
-        
+
         <nav style={{ flex: 1, padding: '16px' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
             <Home size={20} />
@@ -394,7 +398,7 @@ const DivisasPage = () => {
             <Users size={20} /> {sidebarOpen && <span>Representantes</span>}
           </Link>
 
-          <Link to="/divisas" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white'}}>
+          <Link to="/divisas" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white' }}>
             <DollarSign size={20} />
             {sidebarOpen && <span>Divisas</span>}
           </Link>
@@ -423,7 +427,7 @@ const DivisasPage = () => {
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
           {error && viewMode === 'list' && <ErrorAlert message={error} />}
-          
+
           {loading && viewMode === 'list' ? (
             <LoadingSpinner />
           ) : viewMode === 'list' ? (
@@ -432,7 +436,7 @@ const DivisasPage = () => {
                 <div style={{ position: 'relative', flexGrow: 1, minWidth: '250px' }}>
                   <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
                   <input type="text" placeholder="Buscar divisas..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ paddingLeft: '40px', padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
+                    style={{ paddingLeft: '40px', padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box', color: '#000000' }} />
                 </div>
                 <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap' }}>
                   <Plus size={20} />Nueva Divisa
@@ -463,10 +467,10 @@ const DivisasPage = () => {
                           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
                           <td style={{ padding: '16px 24px', fontSize: '14px' }}>{divisa.id}</td>
                           <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: '600' }}>
-                            <span style={{ 
-                              padding: '4px 12px', 
-                              backgroundColor: '#dbeafe', 
-                              color: '#1e40af', 
+                            <span style={{
+                              padding: '4px 12px',
+                              backgroundColor: '#dbeafe',
+                              color: '#1e40af',
                               borderRadius: '6px',
                               fontSize: '13px',
                               fontWeight: '600'
@@ -495,10 +499,10 @@ const DivisasPage = () => {
                 <>
                   <div style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '2px solid #e5e7eb' }}>
                     <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>{selectedDivisa?.name}</h2>
-                    <span style={{ 
-                      padding: '6px 16px', 
-                      backgroundColor: '#dbeafe', 
-                      color: '#1e40af', 
+                    <span style={{
+                      padding: '6px 16px',
+                      backgroundColor: '#dbeafe',
+                      color: '#1e40af',
                       borderRadius: '8px',
                       fontSize: '16px',
                       fontWeight: '600'
