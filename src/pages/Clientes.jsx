@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Users, Menu, Bell, User, Search, Edit2, Trash2, Plus, X, Eye, AlertCircle } from 'lucide-react';
+import { Home, Users, Menu, Bell, User, Search, Edit2, Trash2, Plus, X, Eye, AlertCircle, Package, DollarSign } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // Configuración de la API
 const API_BASE_URL = 'http://localhost:8080/clientes';
@@ -455,14 +456,27 @@ const ClientesPage = () => {
           </button>
         </div>
         <nav style={{ flex: 1, padding: '16px' }}>
-          <a href="#home" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
             <Home size={20} />
             {sidebarOpen && <span>Home</span>}
-          </a>
-          <a href="#clientes" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white' }}>
-            <Users size={20} />
-            {sidebarOpen && <span>Clientes</span>}
-          </a>
+          </Link>
+
+          <Link to="/clientes" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white' }}>
+            <Users size={20} /> {sidebarOpen && <span>Clientes</span>}
+          </Link>
+
+          <Link to="/articulos" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
+            <Package size={20} /> {sidebarOpen && <span>Artículos</span>}
+          </Link>
+
+          <Link to="/representantes" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
+            <Users size={20} /> {sidebarOpen && <span>Representantes</span>}
+          </Link>
+
+          <Link to="/divisas" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
+            <DollarSign size={20} />
+            {sidebarOpen && <span>Divisas</span>}
+          </Link>
         </nav>
       </div>
 
