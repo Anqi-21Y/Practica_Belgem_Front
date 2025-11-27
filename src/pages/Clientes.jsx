@@ -3,22 +3,19 @@ import { Home, Users, Menu, Bell, User, Search, Edit2, Trash2, Plus, X, Eye } fr
 
 const ClientesPage = () => {
 
-  // =========================
-  // ⭐ CAMBIO: ESTILOS LOCALES
-  // =========================
-  // Inyectamos aquí los estilos específicos del buscador para que coincida con Artículos.
-  // Esto evita tocar App.css y aplica solo a Clientes.
+  // ESTILOS LOCALES
   const estilosBuscador = `
     /* estilos iguales a Articulos para la lupa (solo para Clientes) */
     .clientes-search-container {
       position: relative;
       width: 100%;
-      max-width: 300px; /* ancho igual que en Artículos */
+      max-width: 400px; /* ancho máximo del buscador */
+      box-sizing: border-box;
     }
 
     .clientes-search-icon {
       position: absolute;
-      left: 12px; /* coincide con left: 0.75rem */
+      left: 12px;
       top: 50%;
       transform: translateY(-50%);
       color: #9ca3af; /* gray-400 */
@@ -27,19 +24,66 @@ const ClientesPage = () => {
 
     .clientes-search-input {
       width: 100%;
-      padding: 8px 16px 8px 40px; /* espacio izquierdo para el icono */
+      padding: 10px 16px 10px 40px; /* espacio izquierdo para el icono */
       border: 1px solid #d1d5db; /* gray-300 */
       border-radius: 8px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.05);
       transition: border-color 0.15s, box-shadow 0.15s;
       font-size: 14px;
       background: white;
+      box-sizing: border-box;
+      height: 40px;
     }
 
     .clientes-search-input:focus {
       border-color: #4f46e5; /* foco indigo */
       outline: none;
+      box-shadow: 0 0 0 4px rgba(79,70,229,0.06);
     }
+  `;
+
+  // -------------------------
+  // CAMBIO: estilos de layout para centrar el card y manejar el ancho/scroll de la tabla
+  // -------------------------
+  const estilosLayout = `
+    /* Centrar el card y limitar ancho (como en Divisas) */
+    .clientes-card {
+      max-width: 980px; /* CAMBIO: limita ancho del card para que no ocupe toda la pantalla */
+      margin: 0 auto;   /* CAMBIO: centra el card horizontalmente */
+      box-sizing: border-box;
+    }
+
+    /* Wrapper para la tabla: padding interior y scroll horizontal si hace falta */
+    .clientes-table-wrap {
+      padding: 0 24px 24px 24px; /* CAMBIO: padding dentro del card para separar la tabla del borde */
+      overflow-x: auto;          /* CAMBIO: permite scroll horizontal si hay muchas columnas */
+    }
+
+    /* Forzar ancho mínimo de la tabla para que no se compriman columnas */
+    .clientes-table {
+      min-width: 820px; /* CAMBIO: evita compresión de columnas; ajusta si añades columnas */
+      width: 100%;
+      border-collapse: collapse;
+      box-sizing: border-box;
+    }
+
+    .clientes-table th, .clientes-table td {
+      white-space: nowrap; /* CAMBIO: evita que los valores se rompan en varias líneas */
+      text-overflow: ellipsis;
+      overflow: hidden;
+      vertical-align: middle;
+    }
+
+    /* Ajuste del toolbar (buscador + botón) para pantallas pequeñas */
+    .clientes-toolbar { display:flex; gap:1rem; align-items:center; justify-content:space-between; flex-direction:column; }
+    @media(min-width:640px){ .clientes-toolbar { flex-direction:row; } }
+
+    .clientes-search-container { position: relative; width: 100%; }
+    @media(min-width:640px){ .clientes-search-container { width: 50%; } }
+    @media(min-width:1024px){ .clientes-search-container { width: 40%; } }
+
+    /* Alineamiento del botón de acciones (evita solapamientos) */
+    .clientes-actions { display:flex; gap:0.75rem; align-items:center; }
   `;
 
   // Estado y datos 
@@ -318,7 +362,9 @@ const ClientesPage = () => {
    // RENDER PRINCIPAL
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f9fafb', fontFamily: 'system-ui' }}>
-      <style>{estilosBuscador}</style>
+      {/* estilos locales  */}
+      <style>{estilosBuscador + estilosLayout}</style>
+
       {/* SIDEBAR */}
       <div style={{ width: sidebarOpen ? '256px' : '80px', backgroundColor: '#312e81', color: 'white', transition: 'width 0.3s', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #4338ca' }}>
@@ -364,13 +410,16 @@ const ClientesPage = () => {
           </div>
         </header>
 
+
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
           {viewMode === 'list' ? (
-            <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-              <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between' }}>
-                
-                 {/* BLOQUE DE BUSQUEDA */}
-                 <div className="clientes-search-container">
+            // CAMBIO: añadimos className clientes-card para centrar y controlar ancho
+            <div className="clientes-card" style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+
+                {/* CAMBIO: toolbar responsive usando clases */}
+              <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb' }} className="clientes-toolbar">
+                <div className="clientes-search-container">
+                  {/* CAMBIO: usamos la clase para el icono */}
                   <Search size={20} className="clientes-search-icon" />
                   <input
                     type="text"
@@ -381,36 +430,42 @@ const ClientesPage = () => {
                   />
                 </div>
 
-                <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500' }}>
-                  <Plus size={20} />Nuevo Cliente
-                </button>
+                <div className="clientes-actions">
+                  <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '10px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500' }}>
+                    <Plus size={20} /> Nuevo Cliente
+                  </button>
+                </div>
               </div>
 
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                  <tr>
-                    {['ID', 'Nombre', 'NIF', 'Email', 'Teléfono', 'Ciudad', 'Tipo', 'Acciones'].map(h => (
-                      <th key={h} style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
+              {/* CAMBIO: wrapper con scroll y padding para la tabla */}
+              <div className="clientes-table-wrap">
+                {/* CAMBIO: clase clientes-table para controlar min-width */}
+                <table className="clientes-table">
+                  <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                    <tr>
+                      {['ID', 'Nombre', 'NIF', 'Email', 'Teléfono', 'Ciudad', 'Tipo', 'Acciones'].map(h => (
+                        <th key={h} style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
                   {filteredClientes.map((cliente) => (
-                    <tr key={cliente.id} onClick={() => handleViewClient(cliente)}
-                      style={{ borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
-                      <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.id}</td>
-                      <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: '500' }}>{cliente.nombre}</td>
-                      <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.nif}</td>
-                      <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.email}</td>
-                      <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.telefono}</td>
-                      <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.ciudad}</td>
-                      <td style={{ padding: '16px 24px' }}>
-                        <span style={{ padding: '4px 8px', fontSize: '12px', fontWeight: '600', borderRadius: '9999px',
-                          backgroundColor: cliente.tipo_cliente === 'Premium' ? '#f3e8ff' : cliente.tipo_cliente === 'Corporativo' ? '#dbeafe' : '#f3f4f6',
-                          color: cliente.tipo_cliente === 'Premium' ? '#7c3aed' : cliente.tipo_cliente === 'Corporativo' ? '#2563eb' : '#4b5563' }}>
-                          {cliente.tipo_cliente}
-                        </span>
+                      <tr key={cliente.id} onClick={() => handleViewClient(cliente)}
+                        style={{ borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
+                        <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.id}</td>
+                        <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: '500' }}>{cliente.nombre}</td>
+                        <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.nif}</td>
+                        <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.email}</td>
+                        <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.telefono}</td>
+                        <td style={{ padding: '16px 24px', fontSize: '14px' }}>{cliente.ciudad}</td>
+                        <td style={{ padding: '16px 24px' }}>
+                          <span style={{ padding: '4px 8px', fontSize: '12px', fontWeight: '600', borderRadius: '9999px',
+                            backgroundColor: cliente.tipo_cliente === 'Premium' ? '#f3e8ff' : cliente.tipo_cliente === 'Corporativo' ? '#dbeafe' : '#f3f4f6',
+                            color: cliente.tipo_cliente === 'Premium' ? '#7c3aed' : cliente.tipo_cliente === 'Corporativo' ? '#2563eb' : '#4b5563' }}>
+                            {cliente.tipo_cliente}
+                          </span>
                       </td>
+
                       <td style={{ padding: '16px 24px' }} onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           <button onClick={() => handleViewClient(cliente)} style={{ padding: '8px', color: '#059669', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Ver"><Eye size={16} /></button>
@@ -422,6 +477,7 @@ const ClientesPage = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
             </div>
           ) : viewMode === 'view' ? (
             <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '32px', maxWidth: '896px' }}>
