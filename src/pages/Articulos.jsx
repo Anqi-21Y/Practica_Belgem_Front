@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Search, X, Home, Bell, User, Menu, Layers } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, Home, Bell, User, Menu, Layers, Eye } from 'lucide-react';
 
 const Articulos = () => {
   const [productos, setProductos] = useState([
@@ -44,6 +44,10 @@ const Articulos = () => {
     setSelectedProduct(producto);
     setFormData(producto);
     setIsEditing(true);
+  };
+
+  const handleView = (producto) => {
+    alert(`Ver producto:\nID: ${producto.id}\nNombre: ${producto.nombre}\nPrecio: ${producto.precio.toFixed(2)}€`);
   };
 
   const handleSave = () => {
@@ -107,8 +111,8 @@ const Articulos = () => {
     .app-container {
       display: flex;
       min-height: 100vh;
-      background-color: #f3f4f6; /* gray-100 */
-      color: #1f2937; /* gray-800 */
+      background-color: #f3f4f6; 
+      color: #1f2937; 
     }
 
     /* --- Sidebar --- */
@@ -117,10 +121,10 @@ const Articulos = () => {
       top: 0;
       bottom: 0;
       left: 0;
-      width: 16rem; /* w-64 */
-      background-color: #3730a3; /* indigo-900 */
-      color: #e0e7ff; /* indigo-100 */
-      padding: 1rem; /* p-4 */
+      width: 16rem; 
+      background-color: #3730a3; 
+      color: #e0e7ff; 
+      padding: 1rem;
       z-index: 50;
       transform: translateX(-100%);
       transition: transform 0.2s ease-in-out;
@@ -136,133 +140,108 @@ const Articulos = () => {
         transform: translateX(0);
       }
       .main-content-wrapper {
-        margin-left: 16rem; /* md:ml-64 */
+        margin-left: 16rem; 
       }
     }
 
     .sidebar-header {
       display: flex;
       align-items: center;
-      gap: 0.75rem; /* space-x-3 */
-      margin-bottom: 2rem; /* mb-8 */
+      gap: 0.75rem; 
+      margin-bottom: 2rem; 
     }
 
     .sidebar-logo {
-      width: 2.5rem; /* w-10 */
-      height: 2.5rem; /* h-10 */
-      background-color: #4f46e5; /* indigo-600 */
-      border-radius: 9999px; /* rounded-full */
+      width: 2.5rem; 
+      height: 2.5rem; 
+      background-color: #4f46e5; 
+      border-radius: 9999px; 
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem; /* text-xl */
+      font-size: 1.25rem;
       font-weight: bold;
     }
 
-    .sidebar nav ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
+     .sidebar nav ul { list-style: none; padding: 0; margin: 0; }
+  .sidebar nav li { margin-bottom: 0.5rem; }
 
-    .sidebar nav li {
-      margin-bottom: 0.5rem; /* mb-2 */
-    }
+   .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    color: #e0e7ff;
+    text-decoration: none;
+    transition: background-color 0.15s;
+  }
+  .nav-item:hover { background-color: #4338ca; }
+  .nav-item.active {
+    background-color: #4338ca;
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.06);
+  }
 
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem; /* space-x-3 */
-      padding: 0.75rem; /* p-3 */
-      border-radius: 0.375rem; /* rounded-md */
-      color: #e0e7ff;
-      text-decoration: none;
-      transition: background-color 0.15s;
-    }
+.sidebar-close {
+    padding: 0.25rem;
+    border-radius: 0.375rem;
+    color: #c7d2fe;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  .sidebar-close:hover { background-color: #4338ca; }
 
-    .nav-item:hover {
-      background-color: #4338ca; /* hover:bg-indigo-700 */
-    }
-
-    .nav-item.active {
-      background-color: #4338ca; /* bg-indigo-700 */
-      color: white;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06); /* shadow-lg */
-    }
-    
-    .sidebar-close {
-        padding: 0.25rem;
-        border-radius: 0.375rem;
-        color: #c7d2fe; /* indigo-200 */
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        margin-left: auto;
-    }
-    .sidebar-close:hover {
-        background-color: #4338ca;
-    }
 
     /* --- Header --- */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem; /* p-4 */
+      padding: 1rem; 
       background-color: white;
-      border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+      border-bottom: 1px solid #e5e7eb; 
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       position: sticky;
       top: 0;
       z-index: 40;
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-    }
+    .header-left { display:flex; align-items:center; }
+  .header-right { display:flex; align-items:center; gap:1rem; }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 1rem; /* space-x-4 */
-    }
+  .header-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+  }
 
-    .header-title {
-      font-size: 1.5rem; /* text-2xl */
-      font-weight: 700; /* font-bold */
-      color: #111827; /* gray-900 */
-    }
-    
-    .menu-button {
-      padding: 0.5rem;
-      border-radius: 0.375rem;
-      color: #4b5563; /* gray-600 */
-      background: none;
-      border: none;
-      cursor: pointer;
-      margin-right: 1rem;
-    }
+  .menu-button {
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    color: #4b5563;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 1rem;
+  }
+
     .menu-button:hover {
-        background-color: #f3f4f6; /* hover:bg-gray-100 */
+        background-color: #f3f4f6; 
     }
-
-    /* Ocultar botón de menú en desktop */
     @media (min-width: 768px) {
-        .menu-button { display: none; }
+    .menu-button { display: none; }
     }
-
 
     /* --- Main Content --- */
-    .main-content-wrapper {
-      flex: 1; /* flex-1 */
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .main-content {
-      padding: 1rem; /* p-4 */
-    }
+    .main-content-wrapper { flex: 1; display: flex; flex-direction: column; }
+  .main-content { padding: 1rem; }
+
+  @media (min-width: 640px) {
+    .main-content { padding: 1.5rem; }
+  }
 
     @media (min-width: 640px) {
       .main-content {
@@ -272,404 +251,234 @@ const Articulos = () => {
     }
 
     /* --- Mensajes (Notificaciones) --- */
-    .message-box {
-      padding: 0.75rem; /* p-3 */
-      margin-bottom: 1.5rem; /* mb-6 */
-      border-radius: 0.5rem; /* rounded-lg */
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* shadow-md */
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+  .message-box {
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .message-success { background-color: #d1fae5; color: #065f46; }
+  .message-error { background-color: #fee2e2; color: #991b1b; }
+  .message-close-btn { background: none; border: none; cursor: pointer; color: inherit; opacity: 0.8; }
+  .message-close-btn:hover { opacity: 1; }
 
-    .message-success {
-      background-color: #d1fae5; /* green-100 */
-      color: #065f46; /* green-800 */
-    }
+  /* --- Búsqueda y Botón Nuevo --- */
+  .toolbar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+  @media (min-width: 640px) { .toolbar { flex-direction: row; } }
 
-    .message-error {
-      background-color: #fee2e2; /* red-100 */
-      color: #991b1b; /* red-800 */
-    }
-    
-    .message-close-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: inherit;
-        opacity: 0.8;
-    }
-    .message-close-btn:hover {
-        opacity: 1;
-    }
+  .search-container { position: relative; width: 100%; }
+  @media (min-width: 640px) { .search-container { width: 50%; } }
+  @media (min-width: 1024px) { .search-container { width: 33.3333%; } }
 
-    /* --- Búsqueda y Botón Nuevo --- */
-    .toolbar {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem; /* mb-6 */
-      gap: 1rem; /* gap-4 */
-    }
-    
-    @media (min-width: 640px) {
-        .toolbar {
-            flex-direction: row;
-        }
-    }
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+  }
 
-    .search-container {
-      position: relative;
-      width: 100%;
-    }
-    
-    @media (min-width: 640px) {
-        .search-container {
-            width: 50%; /* sm:w-1/2 */
-        }
-    }
-    @media (min-width: 1024px) {
-        .search-container {
-            width: 33.333333%; /* lg:w-1/3 */
-        }
-    }
+  .search-input {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.5rem; /* pl-10 pr-4 py-2 */
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    background: #ffffff;
+    color: #374151;
+    height: 40px;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+  }
 
-    .search-icon {
-      position: absolute;
-      left: 0.75rem; /* left-3 */
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af; /* gray-400 */
-    }
+  /* Cambiar color de autofill para que no quede negro en Chrome */
+  input.search-input:-webkit-autofill,
+  input.search-input:-webkit-autofill:hover,
+  input.search-input:-webkit-autofill:focus,
+  input.search-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #374151 !important;
+  }
 
-    .search-input {
-      width: 100%;
-      padding: 0.5rem 1rem 0.5rem 2.5rem; /* pl-10 pr-4 py-2 */
-      border: 1px solid #d1d5db; /* border border-gray-300 */
-      border-radius: 0.5rem; /* rounded-lg */
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .search-input:focus {
-        border-color: #4f46e5; /* focus:border-indigo-500 */
-        outline: none;
-    }
-    
-    .btn-new {
-      width: 100%;
-      padding: 0.5rem 1.5rem; /* px-6 py-2 */
-      background-color: #4f46e5; /* bg-indigo-600 */
-      color: white;
-      font-weight: 600; /* font-semibold */
-      border-radius: 0.5rem; /* rounded-lg */
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem; /* gap-2 */
-    }
-    .btn-new:hover {
-        background-color: #4338ca; /* hover:bg-indigo-700 */
-    }
+  .search-input:focus {
+    border-color: #4f46e5;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(79,70,229,0.06);
+  }
 
-    @media (min-width: 640px) {
-        .btn-new {
-            width: auto; /* sm:w-auto */
-        }
-    }
+  .btn-new {
+    width: 100%;
+    padding: 0.5rem 1.5rem;
+    background-color: #4f46e5;
+    color: white;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:0.5rem;
+  }
+  .btn-new:hover { background-color: #4338ca; }
+  @media (min-width: 640px) { .btn-new { width: auto; } }
 
-    /* --- Tabla de Datos --- */
-    .table-container {
-      background-color: white;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
-      border-radius: 0.5rem; /* rounded-lg */
-      overflow-x: auto;
-    }
+  /* --- Tabla de Datos --- */
+  .table-container {
+    background-color: white;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    border-radius: 0.5rem;
+    overflow-x: auto;
+  }
 
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      border-top: 1px solid #e5e7eb; /* divide-y divide-gray-200 */
-    }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 1px solid #e5e7eb;
+  }
 
-    .data-table thead {
-      background-color: #f9fafb; /* bg-gray-50 */
-    }
+  .data-table thead { background-color: #f9fafb; }
+  .data-table th {
+    padding: 0.75rem 1.5rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .data-table th:nth-child(3),
+  .data-table th:nth-child(4),
+  .data-table th:nth-child(5) { text-align: right; }
+  .data-table th:last-child { text-align: center; }
 
-    .data-table th {
-      padding: 0.75rem 1.5rem; /* px-6 py-3 */
-      text-align: left;
-      font-size: 0.75rem; /* text-xs */
-      font-weight: 500;
-      color: #6b7280; /* text-gray-500 */
-      text-transform: uppercase;
-      letter-spacing: 0.05em; /* tracking-wider */
-    }
-    
-    .data-table th:nth-child(3),
-    .data-table th:nth-child(4),
-    .data-table th:nth-child(5) {
-        text-align: right;
-    }
-    .data-table th:last-child {
-        text-align: center;
-    }
+  .data-table td {
+    padding: 1rem 1.5rem;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
 
-    .data-table td {
-      padding: 1rem 1.5rem; /* px-6 py-4 */
-      white-space: nowrap;
-      font-size: 0.875rem; /* text-sm */
-      border-bottom: 1px solid #e5e7eb; /* divide-y */
-    }
-    
-    .data-table tbody tr:hover {
-        background-color: #eef2ff; /* hover:bg-indigo-50 */
-        transition: background-color 0.1s;
-    }
-    .data-table tbody tr:last-child td {
-        border-bottom: none;
-    }
+  .data-table tbody tr:hover {
+    background-color: #eef2ff;
+    transition: background-color 0.1s;
+  }
+  .data-table tbody tr:last-child td { border-bottom: none; }
 
-    .cell-id {
-      font-family: monospace;
-      color: #6b7280;
-    }
-    .cell-name {
-      font-weight: 500;
-      color: #111827;
-    }
-    .cell-dto {
-      color: #059669; /* text-green-600 */
-      font-weight: 600;
-      text-align: right;
-    }
-    .cell-price {
-      font-weight: 700;
-      color: #374151; /* text-gray-700 */
-      text-align: right;
-    }
-    .cell-actions {
-      text-align: center;
-    }
-    .action-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 0.75rem; /* gap-3 */
-    }
-    
-    .btn-edit, .btn-delete {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.25rem;
-      border-radius: 9999px;
-      transition: background-color 0.15s;
-    }
-    .btn-edit {
-      color: #4f46e5; /* text-indigo-600 */
-    }
-    .btn-edit:hover {
-      color: #3730a3; /* hover:text-indigo-900 */
-      background-color: #eef2ff; /* hover:bg-indigo-100 */
-    }
-    .btn-delete {
-      color: #dc2626; /* text-red-600 */
-    }
-    .btn-delete:hover {
-      color: #991b1b; /* hover:text-red-900 */
-      background-color: #fee2e2; /* hover:bg-red-100 */
-    }
-    
-    .no-results {
-        text-align: center;
-        color: #6b7280;
-    }
+  .cell-id { font-family: monospace; color: #6b7280; }
+  .cell-name { font-weight: 500; color: #111827; }
+  .cell-dto { color: #059669; font-weight: 600; text-align: right; }
+  .cell-price { font-weight: 700; color: #374151; text-align: right; }
+  .cell-actions { text-align: center; }
 
-    /* --- Formulario --- */
-    .form-container {
-      background-color: white;
-      padding: 1.5rem; /* p-6 */
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
-      border-radius: 0.5rem; /* rounded-lg */
-      max-width: 32rem; /* max-w-lg */
-      margin-left: auto;
-      margin-right: auto;
-    }
+  /* ---------- AÑADIDO: estilos para los botones de acción (ver/editar/eliminar) ---------- */
+  .action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    align-items: center;
+  }
+  .btn-view, .btn-edit, .btn-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 9999px;
+    transition: background-color 0.15s, color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-view { color: #059669; } /* verde */
+  .btn-view:hover { background: rgba(5,150,105,0.08); }
+  .btn-edit { color: #4f46e5; }
+  .btn-edit:hover { background: rgba(79,70,229,0.06); }
+  .btn-delete { color: #dc2626; }
+  .btn-delete:hover { background: rgba(220,38,38,0.06); }
+  /* ------------------------------------------------------------------------------------- */
 
-    .form-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      color: #111827;
-    }
+  .no-results { text-align: center; color: #6b7280; }
 
-    .form-group {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-    
-    .form-label {
-        display: block;
-    }
+  /* --- Formulario --- */
+  .form-container {
+    background-color: white;
+    padding: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    border-radius: 0.5rem;
+    max-width: 32rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
 
-    .form-label span {
-      display: block;
-      color: #374151; /* gray-700 */
-      font-weight: 500;
-      margin-bottom: 0.25rem;
-    }
+  .form-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; color: #111827; }
+  .form-group { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  .form-label { display:block; }
+  .form-label span { display:block; color:#374151; font-weight:500; margin-bottom:0.25rem; }
+  .form-input {
+    display:block; width:100%; padding:0.5rem; border-radius:0.375rem; border:1px solid #d1d5db;
+    box-shadow:0 1px 2px 0 rgba(0,0,0,0.05); font-size:0.875rem;
+  }
+  .form-input:focus { border-color:#4f46e5; outline:none; box-shadow:0 0 0 3px rgba(79,70,229,0.1); }
+  .form-input[disabled] { background-color:#f3f4f6; cursor:not-allowed; }
 
-    .form-input {
-      display: block;
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 0.375rem; /* rounded-md */
-      border: 1px solid #d1d5db; /* border-gray-300 */
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
-      font-size: 0.875rem; /* text-sm */
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
+  .form-actions { display:flex; gap:1rem; margin-top:1.5rem; }
+  .btn-cancel, .btn-save { flex:1; padding:0.5rem 1rem; font-weight:600; border-radius:0.5rem; cursor:pointer; }
+  .btn-cancel { background-color:white; border:1px solid #d1d5db; color:#374151; }
+  .btn-cancel:hover { background-color:#f3f4f6; }
+  .btn-save { background-color:#4f46e5; color:white; border:none; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1); }
+  .btn-save:hover { background-color:#4338ca; }
 
-    .form-input:focus {
-        border-color: #4f46e5;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    }
-    
-    .form-input[disabled] {
-        background-color: #f3f4f6; /* bg-gray-100 */
-        cursor: not-allowed;
-    }
+  /* --- Modal --- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(17,24,39,0.5);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:1rem;
+    z-index:50;
+  }
+  .modal-content {
+    background-color:white; padding:1.5rem; border-radius:0.5rem; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);
+    max-width:24rem; width:100%;
+  }
+  .modal-title { font-size:1.125rem; font-weight:600; color:#111827; margin-bottom:1rem; }
+  .modal-body { color:#4b5563; margin-bottom:1.5rem; }
+  .modal-body strong { color:#dc2626; display:block; margin-top:0.25rem; font-weight:700; }
+  .modal-actions { display:flex; justify-content:flex-end; gap:0.75rem; }
 
-    .form-actions {
-      display: flex;
-      gap: 1rem; /* gap-4 */
-      margin-top: 1.5rem; /* mt-6 */
-    }
-    
-    .btn-cancel, .btn-save {
-      flex: 1;
-      padding: 0.5rem 1rem;
-      font-weight: 600;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: background-color 0.15s;
-    }
-    
-    .btn-cancel {
-      background-color: white;
-      border: 1px solid #d1d5db;
-      color: #374151;
-    }
-    .btn-cancel:hover {
-        background-color: #f3f4f6;
-    }
-    
-    .btn-save {
-      background-color: #4f46e5;
-      color: white;
-      border: none;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .btn-save:hover {
-        background-color: #4338ca;
-    }
+  .btn-modal-cancel { padding:0.5rem 1rem; border:1px solid #d1d5db; border-radius:0.5rem; color:#374151; background:white; cursor:pointer; }
+  .btn-modal-cancel:hover { background-color:#f3f4f6; }
+  .btn-modal-delete { padding:0.5rem 1rem; background-color:#dc2626; color:white; font-weight:600; border:none; border-radius:0.5rem; cursor:pointer; }
+  .btn-modal-delete:hover { background-color:#b91c1c; }
+`;
 
-    /* --- Modal --- */
-    .modal-overlay {
-      position: fixed;
-      inset: 0; /* top: 0, left: 0, right: 0, bottom: 0 */
-      background-color: rgba(17, 24, 39, 0.5); /* bg-gray-900 bg-opacity-50 */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 1rem; /* p-4 */
-      z-index: 50;
-    }
-
-    .modal-content {
-      background-color: white;
-      padding: 1.5rem; /* p-6 */
-      border-radius: 0.5rem; /* rounded-lg */
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
-      max-width: 24rem; /* max-w-sm */
-      width: 100%;
-    }
-
-    .modal-title {
-      font-size: 1.125rem; /* text-lg */
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 1rem; /* mb-4 */
-    }
-    
-    .modal-body {
-        color: #4b5563; /* text-gray-600 */
-        margin-bottom: 1.5rem; /* mb-6 */
-    }
-
-    .modal-body strong {
-      color: #dc2626; /* text-red-600 */
-      display: block;
-      margin-top: 0.25rem; /* mt-1 */
-      font-weight: 700;
-    }
-    
-    .modal-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.75rem; /* gap-3 */
-    }
-
-    .btn-modal-cancel {
-      padding: 0.5rem 1rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.5rem;
-      color: #374151;
-      background: white;
-      cursor: pointer;
-      transition: background-color 0.15s;
-    }
-    .btn-modal-cancel:hover {
-        background-color: #f3f4f6;
-    }
-
-    .btn-modal-delete {
-      padding: 0.5rem 1rem;
-      background-color: #dc2626; /* bg-red-600 */
-      color: white;
-      font-weight: 600;
-      border: none;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: background-color 0.15s;
-    }
-    .btn-modal-delete:hover {
-        background-color: #b91c1c; /* hover:bg-red-700 */
-    }
-  `;
 
   return (
     <div className="app-container">
-      {/* Estilos CSS inyectados */}
       <style>{styles}</style>
+
       
       {/* Sidebar */}
-      <aside 
-        className={`sidebar ${isSidebarOpen ? 'open' : ''}`}
-      >
+      <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">A</div>
           <span className="text-xl font-semibold">Admin Portal</span>
-          <button 
-            className="sidebar-close md:hidden"
-            onClick={() => setIsSidebarOpen(false)}
-          >
+          <button className="sidebar-close md:hidden" onClick={() => setIsSidebarOpen(false)}>
             <X size={20} />
           </button>
         </div>
@@ -703,10 +512,7 @@ const Articulos = () => {
         {/* Header */}
         <header className="header">
           <div className="header-left">
-            <button 
-              className="menu-button"
-              onClick={() => setIsSidebarOpen(true)}
-            >
+            <button className="menu-button" onClick={() => setIsSidebarOpen(true)}>
               <Menu size={24} />
             </button>
             <h1 className="header-title">Productos (Artículos)</h1>
@@ -723,42 +529,33 @@ const Articulos = () => {
           </div>
         </header>
 
-        {/* Contenido de la página de productos (CRUD) */}
         <main className="main-content">
-          {/* Eliminado el div innecesario de alineación */}
-            
-            {/* Mensaje de la aplicación (éxito/error) */}
-            {message && (
-                <div 
-                    className={`message-box ${message.type === 'error' ? 'message-error' : 'message-success'}`}
-                    role="alert"
-                >
-                    <p>{message.text}</p>
-                    <button onClick={() => setMessage(null)} className="message-close-btn"><X size={16} /></button>
-                </div>
-            )}
+          {message && (
+            <div className={`message-box ${message.type === 'error' ? 'message-error' : 'message-success'}`} role="alert">
+              <p>{message.text}</p>
+              <button onClick={() => setMessage(null)} className="message-close-btn"><X size={16} /></button>
+            </div>
+          )}
 
             {!isEditing ? (
               /* Vista principal: Búsqueda y Tabla */
               <>
                 <div className="toolbar">
-                  <div className="search-container">
-                    <Search size={20} className="search-icon" />
-                    <input
-                      type="text"
-                      placeholder="Buscar productos..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="search-input"
-                    />
-                  </div>
-                  <button 
-                    onClick={handleNew} 
-                    className="btn-new"
-                  >
-                    <Plus size={18} /> Nuevo Producto
-                  </button>
+                <div className="search-container">
+              
+                  <Search size={20} className="search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Buscar productos..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                  />
                 </div>
+                  <button onClick={handleNew} className="btn-new">
+                  <Plus size={18} /> Nuevo Producto
+                </button>
+              </div>
 
                 <div className="table-container">
                   <table className="data-table">
@@ -781,28 +578,40 @@ const Articulos = () => {
                           </tr>
                       ) : (
                           filteredProductos.map(p => (
-                            <tr key={p.id}>
-                              <td className="cell-id">{p.id}</td>
-                              <td className="cell-name">{p.nombre}</td>
-                              <td style={{ textAlign: 'right', color: '#4b5563' }}>{p.cantidad}</td>
-                              <td className="cell-dto">{p.dto}%</td>
-                              <td className="cell-price">{p.precio.toFixed(2)}€</td>
-                              <td className="cell-actions">
-                                <div className="action-buttons">
-                                  <button 
-                                    onClick={() => handleEdit(p)} 
-                                    className="btn-edit"
-                                    title="Editar"
-                                  >
-                                    <Edit2 size={16} />
-                                  </button>
-                                  <button 
-                                    onClick={() => handleDeleteClick(p)} 
-                                    className="btn-delete"
-                                    title="Eliminar"
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
+                        <tr key={p.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                              <td style={{ padding: '16px' }}>{p.id}</td>
+                          <td style={{ padding: '16px', fontWeight: 600 }}>{p.nombre}</td>
+                          <td style={{ padding: '16px', textAlign: 'right' }}>{p.cantidad}</td>
+                          <td style={{ padding: '16px', textAlign: 'right', color: '#059669', fontWeight: 600 }}>{p.dto}%</td>
+                          <td style={{ padding: '16px', textAlign: 'right', fontWeight: 700 }}>{p.precio.toFixed(2)}€</td>
+
+                          <td style={{ padding: '16px', textAlign: 'center' }}>
+                            <div className="action-buttons">
+                               <button
+                                className="btn-view"
+                                onClick={() => handleView(p)}
+                                title="Ver"
+                                style={{ background: 'transparent', border: 'none', padding: 6, cursor: 'pointer' }}
+                              >
+                                <Eye size={16} />
+                              </button>
+                              <button
+                                className="btn-edit"
+                                onClick={() => handleEdit(p)}
+                                title="Editar"
+                                style={{ background: 'transparent', border: 'none', padding: 6, cursor: 'pointer' }}
+                              >
+                                <Edit2 size={16} />
+                              </button>
+
+                              <button
+                                className="btn-delete"
+                                onClick={() => handleDeleteClick(p)}
+                                title="Eliminar"
+                                style={{ background: 'transparent', border: 'none', padding: 6, cursor: 'pointer' }}
+                              >
+                                <Trash2 size={16} />
+                              </button>
                                 </div>
                               </td>
                             </tr>
@@ -814,106 +623,51 @@ const Articulos = () => {
               </>
             ) : (
               /* Formulario de Edición/Creación */
-              <div className="form-container">
-                <h2 className="form-title">
-                  {selectedProduct ? 'Editar Producto' : 'Nuevo Producto'}
-                </h2>
-                <div className="form-group">
-                  
-                  <label className="form-label">
-                    <span>ID</span>
-                    <input 
-                      type="text" 
-                      value={formData.id} 
-                      disabled 
-                      className="form-input" 
-                    />
-                  </label>
-
-                  <label className="form-label">
-                    <span>Nombre *</span>
-                    <input 
-                      type="text" 
-                      value={formData.nombre} 
-                      onChange={e => setFormData({ ...formData, nombre: e.target.value })} 
-                      className="form-input" 
-                    />
-                  </label>
-
-                  <label className="form-label">
-                    <span>Cantidad</span>
-                    <input 
-                      type="number" 
-                      value={formData.cantidad} 
-                      onChange={e => setFormData({ ...formData, cantidad: e.target.value })} 
-                      className="form-input" 
-                    />
-                  </label>
-
-                  <label className="form-label">
-                    <span>DTO (%)</span>
-                    <input 
-                      type="number" 
-                      value={formData.dto} 
-                      onChange={e => setFormData({ ...formData, dto: e.target.value })} 
-                      className="form-input" 
-                    />
-                  </label>
-
-                  <label className="form-label">
-                    <span>Precio (€) *</span>
-                    <input 
-                      type="number" 
-                      value={formData.precio} 
-                      onChange={e => setFormData({ ...formData, precio: e.target.value })} 
-                      className="form-input" 
-                    />
-                  </label>
-
-                  <div className="form-actions">
-                    <button 
-                      onClick={handleCancel} 
-                      className="btn-cancel"
-                    >
-                      Cancelar
-                    </button>
-                    <button 
-                      onClick={handleSave} 
-                      className="btn-save"
-                    >
-                      Guardar
-                    </button>
-                  </div>
+              <div style={{ maxWidth: 640, background: 'white', padding: 24, borderRadius: 8 }}>
+              <h2 style={{ marginTop: 0 }}>{selectedProduct ? 'Editar Producto' : 'Nuevo Producto'}</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, color: '#374151' }}>ID</label>
+                  <input value={formData.id} disabled style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #d1d5db' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, color: '#374151' }}>Nombre *</label>
+                  <input value={formData.nombre} onChange={e => setFormData({ ...formData, nombre: e.target.value })} style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #d1d5db' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, color: '#374151' }}>Cantidad</label>
+                  <input type="number" value={formData.cantidad} onChange={e => setFormData({ ...formData, cantidad: e.target.value })} style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #d1d5db' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, color: '#374151' }}>DTO (%)</label>
+                  <input type="number" value={formData.dto} onChange={e => setFormData({ ...formData, dto: e.target.value })} style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #d1d5db' }} />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', fontSize: 12, color: '#374151' }}>Precio (€) *</label>
+                  <input type="number" value={formData.precio} onChange={e => setFormData({ ...formData, precio: e.target.value })} style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #d1d5db' }} />
                 </div>
               </div>
-            )}
 
-            {/* Modal de confirmación de eliminación */}
-            {showDeleteModal && (
-              <div className="modal-overlay">
-                <div className="modal-content">
-                  <h3 className="modal-title">Confirmar Eliminación</h3>
-                  <p className="modal-body">
-                    ¿Estás seguro de que quieres eliminar el producto 
-                    <strong>"{productToDelete?.nombre}"</strong>? Esta acción es irreversible.
-                  </p>
-                  <div className="modal-actions">
-                    <button 
-                      onClick={() => setShowDeleteModal(false)}
-                      className="btn-modal-cancel"
-                    >
-                      Cancelar
-                    </button>
-                    <button 
-                      onClick={handleConfirmDelete} 
-                      className="btn-modal-delete"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
+                <button onClick={handleCancel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white' }}>Cancelar</button>
+                <button onClick={handleSave} style={{ padding: '8px 16px', borderRadius: 8, background: '#4f46e5', color: 'white' }}>Guardar</button>
+              </div>
+            </div>
+          )}
+
+          {/* Modal de confirmación de eliminación */}
+          {showDeleteModal && (
+            <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 50 }}>
+              <div style={{ background: 'white', padding: 24, borderRadius: 8, width: 480 }}>
+                <h3>Confirmar Eliminación</h3>
+                <p>¿Estás seguro de que quieres eliminar el producto <strong>"{productToDelete?.nombre}"</strong>? Esta acción es irreversible.</p>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+                  <button onClick={() => setShowDeleteModal(false)} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>Cancelar</button>
+                  <button onClick={handleConfirmDelete} style={{ padding: '8px 12px', borderRadius: 8, background: '#dc2626', color: 'white' }}>Eliminar</button>
                 </div>
               </div>
-            )}
+            </div>
+          )}
         </main>
       </div>
     </div>
