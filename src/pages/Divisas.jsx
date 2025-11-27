@@ -31,6 +31,49 @@ const DivisasPage = () => {
     name: ''
   });
 
+    // estilos locales para que la lupa sea igual que Articulos
+  const styles = `
+    .divisas-toolbar { display:flex; gap:1rem; align-items:center; justify-content:space-between; flex-direction:column; }
+    @media(min-width:640px){ .divisas-toolbar { flex-direction:row; } }
+
+    .divisas-search-container {
+      position: relative;
+      width: 100%;
+    }
+    @media(min-width:640px){ .divisas-search-container { width: 50%; } }
+    @media(min-width:1024px){ .divisas-search-container { width: 33.3333%; } }
+
+    .divisas-search-icon {
+      position: absolute;
+      left: 0.75rem; /* 12px */
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      pointer-events: none;
+    }
+
+    .divisas-search-input {
+      width: 100%;
+      padding: 0.5rem 1rem 0.5rem 2.5rem; /* pl-10 pr-4 py-2 */
+      border: 1px solid #d1d5db; /* gray-300 */
+      border-radius: 0.5rem; /* 8px */
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      background: white;
+      box-sizing: border-box;
+      height: 40px;
+    }
+
+    .divisas-search-input:focus {
+      border-color: #4f46e5; /* indigo-600 */
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(79,70,229,0.06);
+    }
+
+    /* Asegurar que el botón no se superponga ni cambie el alineamiento */
+    .divisas-actions { display:flex; gap:0.75rem; align-items:center; }
+  `;
+
   const handleViewDivisa = (divisa) => {
     setSelectedDivisa(divisa);
     setViewMode('view');
@@ -216,7 +259,9 @@ const DivisasPage = () => {
 
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f9fafb', fontFamily: 'system-ui' }}>
-      {/* Sidebar */}
+      <style>{styles}</style>
+      
+      {/* SIDEBAR*/}
       <div style={{ width: sidebarOpen ? '256px' : '80px', backgroundColor: '#312e81', color: 'white', transition: 'width 0.3s', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #4338ca' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -242,8 +287,10 @@ const DivisasPage = () => {
         </nav>
       </div>
 
-      {/* Main */}
+      {/* MAIN */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        
+        {/* HEADER */}
         <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e5e7eb', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {viewMode !== 'list' && (
@@ -253,29 +300,44 @@ const DivisasPage = () => {
             )}
             <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{getTitle()}</h1>
             </div>
+
             <div style={{ display: 'flex', gap: '16px' }}>
             <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', position: 'relative' }}>
                 <Bell size={20} />
                 <span style={{ position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px', backgroundColor: '#ef4444', borderRadius: '50%' }}></span>
             </button>
-            <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer' }}><User size={20} /></button>
+            <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer' }}><User size={20} />
+            </button>
             </div>
         </header>
 
-        <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
+        {/* LISTA / VIEW / FORM */}
+        <div style={{ padding: '24px', overflow: 'auto' }}>
+
+          {/* LISTA */}
             {viewMode === 'list' ? (
             <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            
             <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between' }}>
-                <div style={{ position: 'relative' }}>
-                    <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                    <input type="text" placeholder="Buscar divisas..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ paddingLeft: '40px', padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '300px' }} />
+                              
+              {/* LUPA NUEVA */}
+                <div className="divisas-search-container">
+                  <Search size={20} className="divisas-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Buscar divisas..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="divisas-search-input"
+                  />
                 </div>
+                
                 <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500' }}>
                     <Plus size={20} />Nueva Divisa
                 </button>
             </div>
 
+            {/* TABLA */}
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                     <tr>
@@ -315,6 +377,7 @@ const DivisasPage = () => {
             </table>
             </div>
             ) : viewMode === 'view' ? (
+
             <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '32px', maxWidth: '600px' }}>
                 <div style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '2px solid #e5e7eb' }}>
                 <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>{selectedDivisa?.name}</h2>
