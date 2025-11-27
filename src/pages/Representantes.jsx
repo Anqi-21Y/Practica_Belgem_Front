@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import RepresentanteService from '../services/RepresentanteService';
 
 import { Eye, Edit2, Trash2, Search, Home, Package, Users, DollarSign, Menu, Bell, User, Plus, X, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-// Configuración de la API
+// ConfiguraciÃ³n de la API
 const API_BASE_URL = 'http://localhost:8080/representantes';
 
 const getHeaders = () => ({
@@ -138,7 +138,7 @@ export default function ListaRepresentantes() {
     cargarRepresentantes();
   }, []);
 
-  // Función para cargar todos los representantes
+  // FunciÃ³n para cargar todos los representantes
   const cargarRepresentantes = async () => {
     try {
       setLoading(true);
@@ -183,13 +183,13 @@ export default function ListaRepresentantes() {
 
   // eliminar
   const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar este representante?")) {
+    if (window.confirm("Â¿EstÃ¡s seguro de eliminar este representante?")) {
       try {
         setLoading(true);
         await RepresentanteService.eliminarRepresentante(id);
         await cargarRepresentantes();
 
-        // Si estábamos viendo ese representante, volver a la lista
+        // Si estÃ¡bamos viendo ese representante, volver a la lista
         if (selectedRep?.id === id) {
           handleCancel();
         }
@@ -226,9 +226,9 @@ export default function ListaRepresentantes() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    // Validaciones básicas
+    // Validaciones bÃ¡sicas
     if (!formData.name || !formData.phone || !formData.zone || !formData.internalCode) {
-      alert("Por favor complete todos los campos obligatorios (nombre, teléfono, zona, código interno)");
+      alert("Por favor complete todos los campos obligatorios (nombre, telÃ©fono, zona, cÃ³digo interno)");
       return;
     }
 
@@ -406,15 +406,6 @@ export default function ListaRepresentantes() {
                   : selectedRep ? "Editar Representante" : "Nuevo Representante"}
             </h1>
           </div>
-          <div style={{ display: "flex", gap: "16px" }}>
-            <button style={{ padding: "8px", background: "transparent", border: "none", cursor: "pointer", position: "relative" }}>
-              <Bell size={20} />
-              <span style={{ position: "absolute", top: "4px", right: "4px", width: "8px", height: "8px", backgroundColor: "#ef4444", borderRadius: "50%" }} />
-            </button>
-            <button style={{ padding: "8px", background: "transparent", border: "none", cursor: "pointer" }}>
-              <User size={20} />
-            </button>
-          </div>
         </header>
 
         {/* Content */}
@@ -437,7 +428,7 @@ export default function ListaRepresentantes() {
                     placeholder="Buscar representantes..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    style={{ paddingLeft: "40px", padding: "8px 16px", border: "1px solid #d1d5db", borderRadius: "8px", outline: "none", width: "300px", color: "#000000" }}
+                    style={{ paddingLeft: "40px", paddingTop: "8px", paddingBottom: "8px", paddingRight: "16px", border: "1px solid #d1d5db", borderRadius: "8px", outline: "none", width: "300px", color: "#000000" }}
                   />
                 </div>
 

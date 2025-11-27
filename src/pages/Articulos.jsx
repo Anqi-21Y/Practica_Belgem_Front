@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, X, Home, Bell, User, Menu, Package, DollarSign, Users, AlertCircle, Eye } from 'lucide-react';
 import { ArticulosService, mapArticuloFromBackend } from '../services/ArticulosService';
 import { Link } from 'react-router-dom';
@@ -60,7 +60,7 @@ const Articulos = () => {
 
   const handleDelete = async (producto) => {
     const confirmDelete = window.confirm(
-      `¿Estás seguro de que deseas eliminar el producto "${producto.nombre}"?\n\nEsta acción no se puede deshacer.`
+      `Â¿EstÃ¡s seguro de que deseas eliminar el producto "${producto.nombre}"?\n\nEsta acciÃ³n no se puede deshacer.`
     );
 
     if (confirmDelete) {
@@ -81,7 +81,7 @@ const Articulos = () => {
 
   const handleSave = async () => {
     if (!formData.nombre || !formData.precio || parseFloat(formData.precio) <= 0) {
-      alert('Por favor completa los campos obligatorios (Nombre y Precio válido)');
+      alert('Por favor completa los campos obligatorios (Nombre y Precio vÃ¡lido)');
       return;
     }
 
@@ -173,7 +173,7 @@ const Articulos = () => {
       setSelectedProduct(articuloMapeado);
       setViewMode('view');
     } catch (err) {
-      setError('Error al obtener el artículo: ' + err.message);
+      setError('Error al obtener el artÃ­culo: ' + err.message);
       console.error(err);
     } finally {
       setLoading(false);
@@ -183,7 +183,7 @@ const Articulos = () => {
 
   const renderView = () => (
     <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '24px', maxWidth: '600px', margin: '0 auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-      <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Detalles del Artículo</h2>
+      <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Detalles del ArtÃ­culo</h2>
 
 
       <p><strong>ID:</strong> {selectedProduct.id}</p>
@@ -414,13 +414,6 @@ const Articulos = () => {
             )}
             <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{getTitle()}</h1>
           </div>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', position: 'relative' }}>
-              <Bell size={20} />
-              <span style={{ position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px', backgroundColor: '#ef4444', borderRadius: '50%' }}></span>
-            </button>
-            <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer' }}><User size={20} /></button>
-          </div>
         </header>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
@@ -436,7 +429,7 @@ const Articulos = () => {
                 <div style={{ position: 'relative', flexGrow: 1, minWidth: '250px' }}>
                   <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
                   <input type="text" placeholder="Buscar productos..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ paddingLeft: '40px', padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box', color: '#000000' }} />
+                    style={{ paddingLeft: '40px', paddingTop: '8px', paddingBottom: '8px', paddingRight: '16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box', color: '#000000' }} />
                 </div>
                 <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap' }}>
                   <Plus size={20} />Nuevo Producto
