@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Eye, Edit2, Trash2, Search } from 'lucide-react';
-import { Home, Package, Users, DollarSign, Menu, Bell, User } from 'lucide-react';
+import {  Menu, Bell, User } from 'lucide-react';
 import './representantes.css';
 
 
@@ -8,7 +8,6 @@ export default function ListaRepresentantes() {
 
   //Inicializar el estado del cuadro de búsqueda a una cadena vacía
   const [search, setSearch] = useState('');
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   //datos de la lista(iniciar la lista y guardar todos los datos de repres)
@@ -130,14 +129,122 @@ export default function ListaRepresentantes() {
     setShowForm(true);
   };
 
+    // estilos locales para que la lupa sea igual que Articulos
+     const styles = `
+    /* Contenedor central (igual que la tarjeta de Artículos) */
+    .page-card {
+      max-width: 980px; /* CAMBIO: ancho de la 'card' principal; ajústalo si quieres */
+      margin: 0 auto;   /* CAMBIO: centra todo */
+      padding: 24px;    /* espacio interior similar a Artículos */
+    }
 
+    /* Toolbar: buscador + botón (responsive) */
+    .toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+      margin-bottom: 1rem;
+    }
+    @media (min-width: 640px) {
+      .toolbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    /* Search: reproduce exactamente la lupa de Artículos */
+    .search-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px; /* CAMBIO: controla ancho del input, ajústalo */
+    }
+    @media (min-width: 640px) {
+      .search-container { width: 60%; } /* en pantallas >=640px ocupa 60% del page-card */
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem; /* same as left-3 */
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af; /* gray-400 */
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.6rem 1rem 0.6rem 2.5rem; /* pl-10 pr-4 py-2 -> control de altura */
+      border: 1px solid #e6e6e6; /* ligero */
+      border-radius: 10px; /* rounded-lg más suave */
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      font-size: 14px;
+      background-color: #fff;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: #4f46e5; /* morado */
+      box-shadow: 0 8px 20px rgba(79,70,229,0.06);
+    }
+
+    /* Botón nuevo: igual color y tamaño que Artículos */
+    .btn-new {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 8px 16px;
+      border-radius: 10px;
+      background-color: #4f46e5; /* morado igual que Artículos */
+      color: white;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(79,70,229,0.12);
+      white-space: nowrap;
+    }
+
+    /* Card para la tabla: sombra/rounded igual que Artículos */
+    .table-card {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.08);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .table-card table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table-card thead {
+      background-color: #f9fafb;
+      border-bottom: 1px solid #eaeaea;
+    }
+
+    .table-card th, .table-card td {
+      padding: 14px 18px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .table-card tbody tr:nth-child(odd) td {
+      background: transparent;
+    }
+
+    .action-buttons { display:flex; gap:8px; justify-content:flex-end; }
+    .btn-action { border-radius:6px; padding:8px; border:none; background:#f3f4f6; cursor:pointer; }
+  `;
 
   return (
+    
 
     <div className="layout_Repre">
+      <style>{styles}</style>
 
-
-      {/* Main */}
+      {/* MAIN */}
       <div className="main">
         <header className="header">
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="icon-btn">
@@ -157,23 +264,41 @@ export default function ListaRepresentantes() {
 
         <main className="content">
           <div className="content-header">
+
             <h1>Listado de Representantes</h1>
-            <button className="btn-green" onClick={handleNew}>+ Nuevo Representante</button>
           </div>
 
           {/* Search */}
-          <div className="search-box">
-            <Search className="search-icon" />
-            <input
-              type="text"
-              placeholder="Buscar por nombre o email"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          {/* PAGE-CARD centra la zona (igual a Artículos) */}
+          <div className="page-card"></div>
+
+          {/* TOOLBAR contiene buscador y botón alineado como Artículos */}
+          <div className="toolbar">
+            <div className="search-container">
+              {/* Icono lupa con posición absoluta */}
+              <Search className="search-icon" />
+              {/* Input con la clase .search-input (nuevo estilo) */}
+              <input
+                type="text"
+                placeholder="Buscar por nombre o email"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="search-input"
+              />
+            </div>
+
+            {/* Boton nuevo a la derecha en desktop (queda debajo en mobile) */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button className="btn-new" onClick={handleNew}>+ Nuevo Representante</button>
+              </div>
+            </div>
+          
+
 
           {/* Table */}
           <div className="table-container">
+          <div className="table-card">
+
             <table>
               <thead>
                 <tr>
@@ -206,6 +331,7 @@ export default function ListaRepresentantes() {
                 ))}
               </tbody>
             </table>
+            </div>
 
             {filteredRepresentantes.length === 0 && (
               <div className="no-data">No se encontraron representantes</div>
