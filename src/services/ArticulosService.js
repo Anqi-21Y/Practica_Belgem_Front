@@ -21,20 +21,20 @@ const handleResponse = async (response) => {
     const errorText = await response.text();
     throw new Error(`Error ${response.status}: ${errorText || response.statusText}`);
   }
-  
-  // Si la respuesta es 204 No Content (típico en DELETE), no hay JSON
+
   if (response.status === 204) {
     return null;
   }
-  
-  return response.json();
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
 };
 
 /**
  * Servicio de Artículo - Operaciones CRUD
  */
 export const ArticulosService = {
-  
+
   /**
    * Obtener todos los artículos
    * GET /articulos
@@ -111,7 +111,7 @@ export const ArticulosService = {
         headers: getHeaders(),
         body: JSON.stringify(requestBody)
       });
-      
+
       return await handleResponse(response);
     } catch (error) {
       console.error('Error al crear artículo:', error);
@@ -140,7 +140,7 @@ export const ArticulosService = {
         headers: getHeaders(),
         body: JSON.stringify(requestBody)
       });
-      
+
       return await handleResponse(response);
     } catch (error) {
       console.error(`Error al actualizar artículo con ID ${id}:`, error);
@@ -160,7 +160,7 @@ export const ArticulosService = {
         method: 'DELETE',
         headers: getHeaders()
       });
-      
+
       return await handleResponse(response);
     } catch (error) {
       console.error(`Error al eliminar artículo con ID ${id}:`, error);
@@ -174,7 +174,7 @@ export const ArticulosService = {
  */
 export const mapArticuloFromBackend = (articulo) => {
   if (!articulo) return null;
-  
+
   return {
     id: articulo.id,
     nombre: articulo.nombre,
