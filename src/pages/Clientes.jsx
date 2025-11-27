@@ -2,6 +2,47 @@ import React, { useState } from 'react';
 import { Home, Users, Menu, Bell, User, Search, Edit2, Trash2, Plus, X, Eye } from 'lucide-react';
 
 const ClientesPage = () => {
+
+  // =========================
+  // ⭐ CAMBIO: ESTILOS LOCALES
+  // =========================
+  // Inyectamos aquí los estilos específicos del buscador para que coincida con Artículos.
+  // Esto evita tocar App.css y aplica solo a Clientes.
+  const estilosBuscador = `
+    /* estilos iguales a Articulos para la lupa (solo para Clientes) */
+    .clientes-search-container {
+      position: relative;
+      width: 100%;
+      max-width: 300px; /* ancho igual que en Artículos */
+    }
+
+    .clientes-search-icon {
+      position: absolute;
+      left: 12px; /* coincide con left: 0.75rem */
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af; /* gray-400 */
+      pointer-events: none;
+    }
+
+    .clientes-search-input {
+      width: 100%;
+      padding: 8px 16px 8px 40px; /* espacio izquierdo para el icono */
+      border: 1px solid #d1d5db; /* gray-300 */
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      font-size: 14px;
+      background: white;
+    }
+
+    .clientes-search-input:focus {
+      border-color: #4f46e5; /* foco indigo */
+      outline: none;
+    }
+  `;
+
+  // Estado y datos 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedClient, setSelectedClient] = useState(null);
   const [viewMode, setViewMode] = useState('list');
@@ -274,9 +315,11 @@ const ClientesPage = () => {
     </div>
   );
 
+   // RENDER PRINCIPAL
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f9fafb', fontFamily: 'system-ui' }}>
-      {/* Sidebar */}
+      <style>{estilosBuscador}</style>
+      {/* SIDEBAR */}
       <div style={{ width: sidebarOpen ? '256px' : '80px', backgroundColor: '#312e81', color: 'white', transition: 'width 0.3s', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #4338ca' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -301,7 +344,7 @@ const ClientesPage = () => {
         </nav>
       </div>
 
-      {/* Main */}
+      {/* MAIN*/}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e5e7eb', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -325,11 +368,19 @@ const ClientesPage = () => {
           {viewMode === 'list' ? (
             <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
               <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between' }}>
-                <div style={{ position: 'relative' }}>
-                  <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                  <input type="text" placeholder="Buscar clientes..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ paddingLeft: '40px', padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '300px' }} />
+                
+                 {/* BLOQUE DE BUSQUEDA */}
+                 <div className="clientes-search-container">
+                  <Search size={20} className="clientes-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Buscar clientes..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="clientes-search-input"
+                  />
                 </div>
+
                 <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500' }}>
                   <Plus size={20} />Nuevo Cliente
                 </button>
