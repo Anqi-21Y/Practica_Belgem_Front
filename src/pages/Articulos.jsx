@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, X, Home, Bell, User, Menu, Layers, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, Home, Bell, User, Menu, Package, DollarSign, Users, AlertCircle, Eye } from 'lucide-react';
 import { ArticulosService, mapArticuloFromBackend } from '../services/ArticulosService';
+import { Link } from 'react-router-dom';
 
 const Articulos = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -8,7 +9,7 @@ const Articulos = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('list'); // 'list', 'create', 'edit'
+  const [viewMode, setViewMode] = useState('list'); // 'list', 'view', 'create', 'edit'
   const [selectedProduct, setSelectedProduct] = useState(null);
   
   const [formData, setFormData] = useState({
@@ -49,6 +50,7 @@ const Articulos = () => {
     });
     setViewMode('create');
   };
+
 
   const handleEdit = (producto) => {
     setSelectedProduct(producto);
@@ -161,6 +163,42 @@ const Articulos = () => {
       <p style={{ marginTop: '16px', color: '#6b7280' }}>Cargando...</p>
     </div>
   );
+
+  const handleViewArticulo = async (producto) => {
+    setLoading(true);
+    setError(null);
+    try {
+    const data = await ArticulosService.getById(producto.id);
+    const articuloMapeado = mapArticuloFromBackend(data);
+    setSelectedProduct(articuloMapeado);
+    setViewMode('view');
+    } catch (err) {
+    setError('Error al obtener el artículo: ' + err.message);
+    console.error(err);
+    } finally {
+    setLoading(false);
+    }
+  };
+
+
+  const renderView = () => (
+    <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '24px', maxWidth: '600px', margin: '0 auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+    <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Detalles del Artículo</h2>
+
+
+    <p><strong>ID:</strong> {selectedProduct.id}</p>
+    <p><strong>Nombre:</strong> {selectedProduct.nombre}</p>
+    <p><strong>Cantidad:</strong> {selectedProduct.cantidad}</p>
+    <p><strong>Descuento:</strong> {selectedProduct.dto}%</p>
+    <p><strong>Precio:</strong> {selectedProduct.precio} €</p>
+
+
+    <button onClick={() => setViewMode('list')} style={{ marginTop: '24px', padding: '8px 16px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+    Volver
+    </button>
+    </div>
+  );
+
 
   const renderForm = () => (
     <div style={{
@@ -341,14 +379,27 @@ const Articulos = () => {
           </button>
         </div>
         <nav style={{ flex: 1, padding: '16px' }}>
-          <a href="#home" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
             <Home size={20} />
             {sidebarOpen && <span>Home</span>}
-          </a>
-          <a href="#articulos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white' }}>
-            <Layers size={20} />
-            {sidebarOpen && <span>Artículos</span>}
-          </a>
+          </Link>
+
+          <Link to="/clientes" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
+            <Users size={20} /> {sidebarOpen && <span>Clientes</span>}
+          </Link>
+
+          <Link to="/articulos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white' }}>
+            <Package size={20} /> {sidebarOpen && <span>Artículos</span>}
+          </Link>
+
+          <Link to="/representantes" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
+            <Users size={20} /> {sidebarOpen && <span>Representantes</span>}
+          </Link>
+
+          <Link to="/divisas" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
+            <DollarSign size={20} />
+            {sidebarOpen && <span>Divisas</span>}
+          </Link>
         </nav>
       </div>
 
@@ -377,7 +428,9 @@ const Articulos = () => {
           
           {loading && viewMode === 'list' ? (
             <LoadingSpinner />
-          ) : viewMode === 'list' ? (
+          ) : viewMode === 'view' ? (
+            renderView ()
+          ) : viewMode === 'list' ?(
             <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
               <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ position: 'relative', flexGrow: 1, minWidth: '250px' }}>
@@ -419,6 +472,7 @@ const Articulos = () => {
                           <td style={{ padding: '16px 24px', fontSize: '14px', textAlign: 'right', fontWeight: '700', color: '#374151' }}>{producto.precio.toFixed(2)}€</td>
                           <td style={{ padding: '16px 24px', textAlign: 'center' }}>
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                              <button onClick={() => handleViewArticulo(producto)} style={{ padding: '8px', color: '#059669', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Ver"> <Eye size={16} /></button>
                               <button onClick={() => handleEdit(producto)} style={{ padding: '8px', color: '#4f46e5', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Editar"><Edit2 size={16} /></button>
                               <button onClick={() => handleDelete(producto)} style={{ padding: '8px', color: '#dc2626', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Eliminar"><Trash2 size={16} /></button>
                             </div>

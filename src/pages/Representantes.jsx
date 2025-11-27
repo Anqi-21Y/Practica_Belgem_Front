@@ -1,7 +1,109 @@
 import React, { useState, useEffect } from "react";
-import { Eye, Edit2, Trash2, Search, Home, Package, Users, DollarSign, Menu, Bell, User, Plus, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import RepresentanteService from '../services/RepresentanteService';
+
+import { Eye, Edit2, Trash2, Search, Home, Package, Users, DollarSign, Menu, Bell, User, Plus, X, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+// Configuración de la API
+const API_BASE_URL = 'http://localhost:8080/representantes';
+
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Accept': 'application/json'
+});
+
+const handleResponse = async (response) => {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error ${response.status}: ${errorText || response.statusText}`);
+  }
+  if (response.status === 204) {
+    return null;
+  }
+  return response.json();
+};
+
+// Servicio de Representantes integrado
+const RepresentantesService = {
+  listarRepresentantes: async () => {
+    const response = await fetch(API_BASE_URL, {
+      method: 'GET',
+      headers: getHeaders()
+    });
+    return await handleResponse(response);
+  },
+
+  obtenerRepresentantePorId: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'GET',
+      headers: getHeaders()
+    });
+    return await handleResponse(response);
+  },
+
+  crearRepresentante: async (representanteData) => {
+    const requestBody = {
+      internalCode: representanteData.codigo_interno,
+      name: representanteData.nombre,
+      phone: representanteData.telefono || '',
+      email: representanteData.email || '',
+      zone: representanteData.zona || '',
+      commission: Number(representanteData.comision) || 0
+    };
+
+
+    const response = await fetch(API_BASE_URL, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(requestBody)
+    });
+    
+    return await handleResponse(response);
+  },
+
+  actualizarRepresentante: async (id, representanteData) => {
+    const requestBody = {
+      name: representanteData.nombre,
+      phone: representanteData.telefono || '',
+      email: representanteData.email || '',
+      zone: representanteData.zona || '',
+      commission: Number(representanteData.comision) || 0
+    };
+
+
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(requestBody)
+    });
+    
+    return await handleResponse(response);
+  },
+
+  eliminarRepresentante: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    
+    return await handleResponse(response);
+  }
+};
+
+// Mapeo de respuesta del backend a formato frontend
+const mapRepresentanteFromBackend = (representante) => {
+  if (!representante) return null;
+  
+  return {
+    id: representante.idRepresentante,
+    codigo_interno: representante.codigoInterno,
+    nombre: representante.nombre,
+    telefono: representante.telefono,
+    email: representante.email,
+    zona: representante.zona,
+    comision: representante.comision
+  };
+};
 
 export default function ListaRepresentantes() {
   // Sidebar

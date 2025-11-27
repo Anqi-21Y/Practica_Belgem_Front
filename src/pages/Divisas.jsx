@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Home, Users, Menu, Bell, User, Search, Edit2, Trash2, Plus, X, Eye, Package, DollarSign, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // Configuración de la API
 const API_BASE_URL = 'http://localhost:8080/divisas';
@@ -376,27 +377,27 @@ const DivisasPage = () => {
         </div>
         
         <nav style={{ flex: 1, padding: '16px' }}>
-          <a href="#home" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
             <Home size={20} />
             {sidebarOpen && <span>Home</span>}
-          </a>
+          </Link>
 
-          <a href="#clientes" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
+          <Link to="/clientes" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
             <Users size={20} /> {sidebarOpen && <span>Clientes</span>}
-          </a>
+          </Link>
 
-          <a href="#articulos" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
+          <Link to="/articulos" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
             <Package size={20} /> {sidebarOpen && <span>Artículos</span>}
-          </a>
+          </Link>
 
-          <a href="#representantes" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
+          <Link to="/representantes" style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", textDecoration: "none", color: "white", marginBottom: "8px" }}>
             <Users size={20} /> {sidebarOpen && <span>Representantes</span>}
-          </a>
+          </Link>
 
-          <a href="#divisas" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white' }}>
+          <Link to="/divisas" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white'}}>
             <DollarSign size={20} />
             {sidebarOpen && <span>Divisas</span>}
-          </a>
+          </Link>
         </nav>
       </div>
 
