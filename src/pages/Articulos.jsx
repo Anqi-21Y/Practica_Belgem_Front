@@ -397,15 +397,6 @@ const Articulos = () => {
             )}
             <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{getTitle()}</h1>
           </div>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', position: 'relative' }}>
-              <Bell size={20} />
-              <span style={{ position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px', backgroundColor: '#ef4444', borderRadius: '50%' }}></span>
-            </button>
-            <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-              <User size={20} />
-            </button>
-          </div>
         </header>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
