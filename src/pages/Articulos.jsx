@@ -51,7 +51,6 @@ const Articulos = () => {
     setViewMode('create');
   };
 
-
   const handleEdit = (producto) => {
     setSelectedProduct(producto);
     setFormData(producto);
@@ -60,7 +59,7 @@ const Articulos = () => {
 
   const handleDelete = async (producto) => {
     const confirmDelete = window.confirm(
-      `Â¿EstÃ¡s seguro de que deseas eliminar el producto "${producto.nombre}"?\n\nEsta acciÃ³n no se puede deshacer.`
+      `¿Estás seguro de que deseas eliminar el producto "${producto.nombre}"?\n\nEsta acción no se puede deshacer.`
     );
 
     if (confirmDelete) {
@@ -81,7 +80,7 @@ const Articulos = () => {
 
   const handleSave = async () => {
     if (!formData.nombre || !formData.precio || parseFloat(formData.precio) <= 0) {
-      alert('Por favor completa los campos obligatorios (Nombre y Precio vÃ¡lido)');
+      alert('Por favor completa los campos obligatorios (Nombre y Precio válido)');
       return;
     }
 
@@ -118,6 +117,22 @@ const Articulos = () => {
     setFormData({ ...formData, [field]: value });
   };
 
+  const handleViewArticulo = async (producto) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await ArticulosService.getById(producto.id);
+      const articuloMapeado = mapArticuloFromBackend(data);
+      setSelectedProduct(articuloMapeado);
+      setViewMode('view');
+    } catch (err) {
+      setError('Error al obtener el artículo: ' + err.message);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredProductos = productos.filter(p =>
     p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.id.toString().includes(searchTerm)
@@ -125,8 +140,9 @@ const Articulos = () => {
 
   const getTitle = () => {
     switch (viewMode) {
-      case 'edit': return 'Editar Producto';
-      case 'create': return 'Nuevo Producto';
+      case 'view': return 'Detalles del Artículo';
+      case 'edit': return 'Editar Artículo';
+      case 'create': return 'Nuevo Artículo';
       default: return 'Artículos';
     }
   };
@@ -164,58 +180,21 @@ const Articulos = () => {
     </div>
   );
 
-  const handleViewArticulo = async (producto) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await ArticulosService.getById(producto.id);
-      const articuloMapeado = mapArticuloFromBackend(data);
-      setSelectedProduct(articuloMapeado);
-      setViewMode('view');
-    } catch (err) {
-      setError('Error al obtener el artÃ­culo: ' + err.message);
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  const renderView = () => (
-    <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '24px', maxWidth: '600px', margin: '0 auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-      <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Detalles del ArtÃ­culo</h2>
-
-
-      <p><strong>ID:</strong> {selectedProduct.id}</p>
-      <p><strong>Nombre:</strong> {selectedProduct.nombre}</p>
-      <p><strong>Cantidad:</strong> {selectedProduct.cantidad}</p>
-      <p><strong>Descuento:</strong> {selectedProduct.dto}%</p>
-      <p><strong>Precio:</strong> {selectedProduct.precio} €</p>
-
-
-      <button onClick={() => setViewMode('list')} style={{ marginTop: '24px', padding: '8px 16px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-        Volver
-      </button>
-    </div>
-  );
-
-
   const renderForm = () => (
     <div style={{
       backgroundColor: 'white',
       borderRadius: '8px',
       boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
       padding: '24px',
-      maxWidth: '600px',
-      margin: '0 auto'
+      maxWidth: '896px'
     }}>
       {error && <ErrorAlert message={error} />}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
-        {selectedProduct && (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        {viewMode === 'edit' && (
           <div>
             <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-              ID
+              ID Artículo
             </label>
             <input
               type="text"
@@ -228,12 +207,14 @@ const Articulos = () => {
                 borderRadius: '8px',
                 backgroundColor: '#f3f4f6',
                 boxSizing: 'border-box',
-                color: '#000000'
+                color: '#6b7280',
+                outline: 'none'
               }}
             />
           </div>
         )}
-        <div>
+
+        <div style={{ gridColumn: viewMode === 'edit' ? 'auto' : '1 / -1' }}>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
             Nombre del Producto *
           </label>
@@ -249,60 +230,61 @@ const Articulos = () => {
               borderRadius: '8px',
               outline: 'none',
               boxSizing: 'border-box',
-              backgroundColor: loading ? '#f3f4f6' : 'white'
+              backgroundColor: loading ? '#f3f4f6' : 'white',
+              color: '#000000'
             }}
             placeholder="Ej: Tornillo M6"
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-              Cantidad
-            </label>
-            <input
-              type="number"
-              value={formData.cantidad}
-              onChange={(e) => handleInputChange('cantidad', e.target.value)}
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                outline: 'none',
-                boxSizing: 'border-box',
-                backgroundColor: loading ? '#f3f4f6' : 'white'
-              }}
-              placeholder="0"
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-              Descuento (%)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              value={formData.dto}
-              onChange={(e) => handleInputChange('dto', e.target.value)}
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                outline: 'none',
-                boxSizing: 'border-box',
-                backgroundColor: loading ? '#f3f4f6' : 'white'
-              }}
-              placeholder="0.00"
-            />
-          </div>
+        <div>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+            Cantidad
+          </label>
+          <input
+            type="number"
+            value={formData.cantidad}
+            onChange={(e) => handleInputChange('cantidad', e.target.value)}
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              outline: 'none',
+              boxSizing: 'border-box',
+              backgroundColor: loading ? '#f3f4f6' : 'white',
+              color: '#000000'
+            }}
+            placeholder="0"
+          />
         </div>
 
         <div>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+            Descuento (%)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            value={formData.dto}
+            onChange={(e) => handleInputChange('dto', e.target.value)}
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              outline: 'none',
+              boxSizing: 'border-box',
+              backgroundColor: loading ? '#f3f4f6' : 'white',
+              color: '#000000'
+            }}
+            placeholder="0.00"
+          />
+        </div>
+
+        <div style={{ gridColumn: '1 / -1' }}>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
             Precio (€) *
           </label>
@@ -319,7 +301,8 @@ const Articulos = () => {
               borderRadius: '8px',
               outline: 'none',
               boxSizing: 'border-box',
-              backgroundColor: loading ? '#f3f4f6' : 'white'
+              backgroundColor: loading ? '#f3f4f6' : 'white',
+              color: '#000000'
             }}
             placeholder="0.00"
           />
@@ -360,7 +343,7 @@ const Articulos = () => {
           {loading ? 'Guardando...' : 'Guardar Cambios'}
         </button>
       </div>
-    </div >
+    </div>
   );
 
   return (
@@ -388,7 +371,7 @@ const Articulos = () => {
             <Users size={20} /> {sidebarOpen && <span>Clientes</span>}
           </Link>
 
-          <Link to="/articulos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white' }}>
+          <Link to="/articulos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white', marginBottom: '8px' }}>
             <Package size={20} /> {sidebarOpen && <span>Artículos</span>}
           </Link>
 
@@ -414,6 +397,15 @@ const Articulos = () => {
             )}
             <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{getTitle()}</h1>
           </div>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', position: 'relative' }}>
+              <Bell size={20} />
+              <span style={{ position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px', backgroundColor: '#ef4444', borderRadius: '50%' }}></span>
+            </button>
+            <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+              <User size={20} />
+            </button>
+          </div>
         </header>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
@@ -421,27 +413,25 @@ const Articulos = () => {
 
           {loading && viewMode === 'list' ? (
             <LoadingSpinner />
-          ) : viewMode === 'view' ? (
-            renderView()
           ) : viewMode === 'list' ? (
             <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
               <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ position: 'relative', flexGrow: 1, minWidth: '250px' }}>
                   <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                  <input type="text" placeholder="Buscar productos..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                  <input type="text" placeholder="Buscar artículos..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                     style={{ paddingLeft: '40px', paddingTop: '8px', paddingBottom: '8px', paddingRight: '16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box', color: '#000000' }} />
                 </div>
                 <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap' }}>
-                  <Plus size={20} />Nuevo Producto
+                  <Plus size={20} />Nuevo Artículo
                 </button>
               </div>
 
               <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
                   <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
                     <tr>
                       {['ID', 'Nombre', 'Cantidad', 'DTO (%)', 'Precio (€)', 'Acciones'].map(h => (
-                        <th key={h} style={{ padding: '12px 24px', textAlign: h === 'Nombre' ? 'left' : h === 'Acciones' ? 'center' : 'right', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>{h}</th>
+                        <th key={h} style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -449,25 +439,31 @@ const Articulos = () => {
                     {filteredProductos.length === 0 ? (
                       <tr>
                         <td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>
-                          {searchTerm ? 'No se encontraron productos' : 'Aún no hay productos. ¡Crea uno nuevo!'}
+                          {searchTerm ? 'No se encontraron artículos' : 'No hay artículos'}
                         </td>
                       </tr>
                     ) : (
                       filteredProductos.map((producto) => (
-                        <tr key={producto.id}
-                          style={{ borderBottom: '1px solid #e5e7eb', transition: 'background-color 0.2s' }}
+                        <tr key={producto.id} onClick={() => handleViewArticulo(producto)}
+                          style={{ borderBottom: '1px solid #e5e7eb', cursor: 'pointer', transition: 'background-color 0.2s' }}
                           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                          <td style={{ padding: '16px 24px', fontSize: '14px', fontFamily: 'monospace', color: '#6b7280' }}>{producto.id}</td>
+                          <td style={{ padding: '16px 24px', fontSize: '14px' }}>{producto.id}</td>
                           <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: '500' }}>{producto.nombre}</td>
-                          <td style={{ padding: '16px 24px', fontSize: '14px', textAlign: 'right', color: '#4b5563' }}>{producto.cantidad}</td>
-                          <td style={{ padding: '16px 24px', fontSize: '14px', textAlign: 'right', color: '#059669', fontWeight: '600' }}>{producto.dto}%</td>
-                          <td style={{ padding: '16px 24px', fontSize: '14px', textAlign: 'right', fontWeight: '700', color: '#374151' }}>{producto.precio.toFixed(2)}€</td>
-                          <td style={{ padding: '16px 24px', textAlign: 'center' }}>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                              <button onClick={() => handleViewArticulo(producto)} style={{ padding: '8px', color: '#059669', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Ver"> <Eye size={16} /></button>
-                              <button onClick={() => handleEdit(producto)} style={{ padding: '8px', color: '#4f46e5', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Editar"><Edit2 size={16} /></button>
-                              <button onClick={() => handleDelete(producto)} style={{ padding: '8px', color: '#dc2626', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Eliminar"><Trash2 size={16} /></button>
+                          <td style={{ padding: '16px 24px', fontSize: '14px' }}>{producto.cantidad}</td>
+                          <td style={{ padding: '16px 24px', fontSize: '14px' }}>{producto.dto}%</td>
+                          <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: '600' }}>{producto.precio.toFixed(2)}€</td>
+                          <td style={{ padding: '16px 24px' }} onClick={(e) => e.stopPropagation()}>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button onClick={() => handleViewArticulo(producto)} style={{ padding: '8px', color: '#059669', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Ver">
+                                <Eye size={16} />
+                              </button>
+                              <button onClick={() => handleEdit(producto)} style={{ padding: '8px', color: '#4f46e5', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Editar">
+                                <Edit2 size={16} />
+                              </button>
+                              <button onClick={() => handleDelete(producto)} style={{ padding: '8px', color: '#dc2626', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Eliminar">
+                                <Trash2 size={16} />
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -476,6 +472,50 @@ const Articulos = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          ) : viewMode === 'view' ? (
+            <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '32px', maxWidth: '896px' }}>
+              {loading ? <LoadingSpinner /> : (
+                <>
+                  <div style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '2px solid #e5e7eb' }}>
+                    <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>{selectedProduct?.nombre}</h2>
+                    <span style={{
+                      padding: '6px 12px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      borderRadius: '9999px',
+                      backgroundColor: '#dbeafe',
+                      color: '#2563eb'
+                    }}>
+                      Artículo
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+                    {[
+                      { label: 'ID Artículo', value: selectedProduct?.id },
+                      { label: 'Nombre', value: selectedProduct?.nombre },
+                      { label: 'Cantidad', value: selectedProduct?.cantidad },
+                      { label: 'Descuento (%)', value: selectedProduct?.dto + '%' },
+                      { label: 'Precio (€)', value: selectedProduct?.precio?.toFixed(2) + '€' }
+                    ].map(({ label, value }) => (
+                      <div key={label}>
+                        <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', marginBottom: '8px' }}>{label}</h3>
+                        <p style={{ fontSize: '16px', margin: 0 }}>{value || '-'}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
+                    <button onClick={handleCancel} style={{ padding: '8px 24px', border: '1px solid #d1d5db', borderRadius: '8px', color: '#374151', backgroundColor: 'white', cursor: 'pointer', fontWeight: '500' }}>
+                      Volver
+                    </button>
+                    <button onClick={() => handleEdit(selectedProduct)} style={{ padding: '8px 24px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}>
+                      Editar Artículo
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ) : renderForm()}
         </div>

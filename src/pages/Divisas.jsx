@@ -150,7 +150,7 @@ const DivisasPage = () => {
 
   const handleDelete = async (divisa) => {
     const confirmDelete = window.confirm(
-      `Â¿EstÃ¡s seguro de que deseas eliminar la divisa "${divisa.name}"?\n\nEsta acciÃ³n no se puede deshacer.`
+      `¿Estás seguro de que deseas eliminar la divisa "${divisa.name}"?\n\nEsta acción no se puede deshacer.`
     );
 
     if (confirmDelete) {

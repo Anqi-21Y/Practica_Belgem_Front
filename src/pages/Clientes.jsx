@@ -185,7 +185,7 @@ const ClientesPage = () => {
 
   const handleDelete = async (cliente) => {
     const confirmDelete = window.confirm(
-      `Â¿EstÃ¡s seguro de que deseas eliminar el cliente "${cliente.nombre}"?\n\nEsta acciÃ³n no se puede deshacer.`
+      `¿Estás seguro de que deseas eliminar el cliente "${cliente.nombre}"?\n\nEsta acción no se puede deshacer.`
     );
 
     if (confirmDelete) {
