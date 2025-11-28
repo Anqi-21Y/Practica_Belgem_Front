@@ -183,7 +183,7 @@ export default function ListaRepresentantes() {
 
   // eliminar
   const handleDelete = async (id) => {
-    if (window.confirm("Â¿EstÃ¡s seguro de eliminar este representante?")) {
+    if (window.confirm("¿Estás seguro de eliminar este representante?")) {
       try {
         setLoading(true);
         await RepresentanteService.eliminarRepresentante(id);
