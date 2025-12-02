@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/representantes';
+const API_URL = 'http://localhost:8080/api/v1/representantes';
 
 /**
  * Servicio para gestionar las operaciones relacionadas con Representantes.

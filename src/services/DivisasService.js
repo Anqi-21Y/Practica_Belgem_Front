@@ -1,6 +1,6 @@
 // services/DivisasService.js
 
-const API_BASE_URL = 'http://localhost:8080/divisas';
+const API_BASE_URL = 'http://localhost:8080/api/v1/divisas';
 
 const getHeaders = () => ({
   'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ const DivisasService = {
       headers: getHeaders(),
       body: JSON.stringify(requestBody)
     });
-    
+
     return await handleResponse(response);
   },
 
@@ -61,7 +61,7 @@ const DivisasService = {
       headers: getHeaders(),
       body: JSON.stringify(requestBody)
     });
-    
+
     return await handleResponse(response);
   },
 
@@ -70,7 +70,7 @@ const DivisasService = {
       method: 'DELETE',
       headers: getHeaders()
     });
-    
+
     return await handleResponse(response);
   }
 };
@@ -78,7 +78,7 @@ const DivisasService = {
 // Mapeo de respuesta del backend a formato frontend
 export const mapDivisaFromBackend = (divisa) => {
   if (!divisa) return null;
-  
+
   return {
     id: divisa.id,
     code: divisa.code,
