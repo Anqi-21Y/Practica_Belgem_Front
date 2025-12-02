@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/v1/representantes';
+const API_BASE_URL = 'http://localhost:8080/api/v1/representantes';
 
 /**
  * Servicio para gestionar las operaciones relacionadas con Representantes.
@@ -15,7 +15,7 @@ class RepresentanteService {
    */
   async listarRepresentantes() {
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(API_BASE_URL);
       return response.data;
     } catch (error) {
       console.error('Error al listar representantes:', error);
@@ -31,7 +31,7 @@ class RepresentanteService {
    */
   async obtenerRepresentantePorId(id) {
     try {
-      const response = await axios.get(`${API_URL}/${id}`);
+      const response = await axios.get(`${API_BASE_URL}/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error al obtener representante con ID ${id}:`, error);
@@ -53,7 +53,7 @@ class RepresentanteService {
    */
   async crearRepresentante(representanteData) {
     try {
-      const response = await axios.post(API_URL, representanteData);
+      const response = await axios.post(API_BASE_URL, representanteData);
       return response.data;
     } catch (error) {
       console.error('Error al crear representante:', error);
@@ -76,7 +76,7 @@ class RepresentanteService {
    */
   async actualizarRepresentante(id, representanteData) {
     try {
-      const response = await axios.put(`${API_URL}/${id}`, representanteData);
+      const response = await axios.put(`${API_BASE_URL}/${id}`, representanteData);
       return response.data;
     } catch (error) {
       console.error(`Error al actualizar representante con ID ${id}:`, error);
@@ -92,7 +92,7 @@ class RepresentanteService {
    */
   async eliminarRepresentante(id) {
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await axios.delete(`${API_BASE_URL}/${id}`);
     } catch (error) {
       console.error(`Error al eliminar representante con ID ${id}:`, error);
       throw error;
