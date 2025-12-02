@@ -1,103 +1,159 @@
-import axios from 'axios';
+/**
+ * Servicio para gestionar las operaciones CRUD de representantes
+ * mediante comunicación con el backend REST API.
+ * 
+ * Base URL: http://localhost:8080/api/v1/representantes
+ */
 
 const API_BASE_URL = 'http://localhost:8080/api/v1/representantes';
 
 /**
- * Servicio para gestionar las operaciones relacionadas con Representantes.
- * Se comunica con el backend a través de la API REST.
+ * Configuración común para las peticiones fetch
  */
-class RepresentanteService {
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Accept': 'application/json'
+});
+
+/**
+ * Manejo centralizado de errores HTTP
+ */
+const handleResponse = async (response) => {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error ${response.status}: ${errorText || response.statusText}`);
+  }
+
+  // Si la respuesta es 204 No Content (típico en DELETE), no hay JSON
+  if (response.status === 204) {
+    return null;
+  }
+
+  return response.json();
+};
+
+/**
+ * Servicio de Representante - Operaciones CRUD
+ */
+const RepresentanteService = {
 
   /**
-   * Obtiene la lista completa de representantes.
+   * Obtener todos los representantes
    * GET /representantes
    * @returns {Promise<Array>} Lista de representantes
    */
-  async listarRepresentantes() {
+  listarRepresentantes: async () => {
     try {
-      const response = await axios.get(API_BASE_URL);
-      return response.data;
+      const response = await fetch(API_BASE_URL, {
+        method: 'GET',
+        headers: getHeaders()
+      });
+      return await handleResponse(response);
     } catch (error) {
       console.error('Error al listar representantes:', error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Obtiene un representante específico por su ID.
+   * Obtener un representante por ID
    * GET /representantes/{id}
    * @param {number} id - ID del representante
    * @returns {Promise<Object>} Datos del representante
    */
-  async obtenerRepresentantePorId(id) {
+  obtenerRepresentantePorId: async (id) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/${id}`);
-      return response.data;
+      const response = await fetch(`${API_BASE_URL}/${id}`, {
+        method: 'GET',
+        headers: getHeaders()
+      });
+      return await handleResponse(response);
     } catch (error) {
       console.error(`Error al obtener representante con ID ${id}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Crea un nuevo representante.
+   * Crear un nuevo representante
    * POST /representantes
    * @param {Object} representanteData - Datos del representante a crear
-   * @param {string} representanteData.name - Nombre del representante
-   * @param {string} representanteData.phone - Teléfono del representante
-   * @param {string} representanteData.email - Email del representante
-   * @param {string} representanteData.zone - Zona del representante
-   * @param {string} representanteData.internalCode - Código interno único
-   * @param {number} representanteData.commission - Comisión del representante
    * @returns {Promise<Object>} Representante creado
    */
-  async crearRepresentante(representanteData) {
+  crearRepresentante: async (representanteData) => {
     try {
-      const response = await axios.post(API_BASE_URL, representanteData);
-      return response.data;
+      const requestBody = {
+        name: representanteData.name,
+        phone: representanteData.phone,
+        email: representanteData.email || null,
+        zone: representanteData.zone,
+        internalCode: representanteData.internalCode,
+        commission: representanteData.commission ? Number(representanteData.commission) : null
+      };
+
+      const response = await fetch(API_BASE_URL, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(requestBody)
+      });
+
+      return await handleResponse(response);
     } catch (error) {
       console.error('Error al crear representante:', error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Actualiza un representante existente.
+   * Actualizar un representante existente
    * PUT /representantes/{id}
    * @param {number} id - ID del representante a actualizar
    * @param {Object} representanteData - Datos actualizados del representante
-   * @param {string} representanteData.name - Nombre del representante
-   * @param {string} representanteData.phone - Teléfono del representante
-   * @param {string} representanteData.email - Email del representante
-   * @param {string} representanteData.zone - Zona del representante
-   * @param {string} representanteData.internalCode - Código interno único
-   * @param {number} representanteData.commission - Comisión del representante
    * @returns {Promise<Object>} Representante actualizado
    */
-  async actualizarRepresentante(id, representanteData) {
+  actualizarRepresentante: async (id, representanteData) => {
     try {
-      const response = await axios.put(`${API_BASE_URL}/${id}`, representanteData);
-      return response.data;
+      const requestBody = {
+        name: representanteData.name,
+        phone: representanteData.phone,
+        email: representanteData.email || null,
+        zone: representanteData.zone,
+        internalCode: representanteData.internalCode,
+        commission: representanteData.commission ? Number(representanteData.commission) : null
+      };
+
+      const response = await fetch(`${API_BASE_URL}/${id}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(requestBody)
+      });
+
+      return await handleResponse(response);
     } catch (error) {
       console.error(`Error al actualizar representante con ID ${id}:`, error);
       throw error;
     }
-  }
+  },
 
   /**
-   * Elimina un representante por su ID.
+   * Eliminar un representante
    * DELETE /representantes/{id}
    * @param {number} id - ID del representante a eliminar
    * @returns {Promise<void>}
    */
-  async eliminarRepresentante(id) {
+  eliminarRepresentante: async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/${id}`);
+      const response = await fetch(`${API_BASE_URL}/${id}`, {
+        method: 'DELETE',
+        headers: getHeaders()
+      });
+
+      return await handleResponse(response);
     } catch (error) {
       console.error(`Error al eliminar representante con ID ${id}:`, error);
       throw error;
     }
   }
-}
+};
 
-export default new RepresentanteService();
+export default RepresentanteService;

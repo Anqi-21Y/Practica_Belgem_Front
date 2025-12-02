@@ -1,7 +1,93 @@
 ﻿import React, { useState, useEffect } from "react";
 import { Eye, Edit2, Trash2, Search, Home, Package, Users, DollarSign, Menu, Plus, X, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import RepresentanteService from '../services/RepresentanteService';
+
+// Configuración de la API - igual que en ClientesPage
+const API_BASE_URL = 'http://localhost:8080/representantes';
+
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Accept': 'application/json'
+});
+
+const handleResponse = async (response) => {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error ${response.status}: ${errorText || response.statusText}`);
+  }
+  if (response.status === 204) {
+    return null;
+  }
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+};
+
+// Servicio de Representante integrado
+const RepresentanteService = {
+  listarRepresentantes: async () => {
+    const response = await fetch(API_BASE_URL, {
+      method: 'GET',
+      headers: getHeaders()
+    });
+    return await handleResponse(response);
+  },
+
+  obtenerRepresentantePorId: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'GET',
+      headers: getHeaders()
+    });
+    return await handleResponse(response);
+  },
+
+  crearRepresentante: async (representanteData) => {
+    const requestBody = {
+      name: representanteData.name,
+      phone: representanteData.phone,
+      email: representanteData.email || null,
+      zone: representanteData.zone,
+      internalCode: representanteData.internalCode,
+      commission: representanteData.commission ? Number(representanteData.commission) : null
+    };
+
+    const response = await fetch(API_BASE_URL, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(requestBody)
+    });
+
+    return await handleResponse(response);
+  },
+
+  actualizarRepresentante: async (id, representanteData) => {
+    const requestBody = {
+      name: representanteData.name,
+      phone: representanteData.phone,
+      email: representanteData.email || null,
+      zone: representanteData.zone,
+      internalCode: representanteData.internalCode,
+      commission: representanteData.commission ? Number(representanteData.commission) : null
+    };
+
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(requestBody)
+    });
+
+    return await handleResponse(response);
+  },
+
+  eliminarRepresentante: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+
+    return await handleResponse(response);
+  }
+};
 
 const RepresentantesPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -259,8 +345,6 @@ const RepresentantesPage = () => {
             fontWeight: '500',
             opacity: loading ? 0.6 : 1
           }}
-          onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#f9fafb')}
-          onMouseOut={(e) => !loading && (e.target.style.backgroundColor = 'white')}
         >
           Cancelar
         </button>
@@ -277,8 +361,6 @@ const RepresentantesPage = () => {
             fontWeight: '500',
             opacity: loading ? 0.6 : 1
           }}
-          onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#4338ca')}
-          onMouseOut={(e) => !loading && (e.target.style.backgroundColor = '#4f46e5')}
         >
           {loading ? 'Guardando...' : 'Guardar Cambios'}
         </button>
@@ -297,31 +379,23 @@ const RepresentantesPage = () => {
             </div>
             {sidebarOpen && <span style={{ fontWeight: '600' }}>Admin Portal</span>}
           </div>
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ padding: '4px', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '4px' }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#4338ca'}
-            onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ padding: '4px', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '4px' }}>
             <Menu size={20} />
           </button>
         </div>
 
         <nav style={{ flex: 1, padding: '16px' }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#4338ca'}
-            onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
             <Home size={20} />
             {sidebarOpen && <span>Home</span>}
           </Link>
 
-          <Link to="/clientes" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#4338ca'}
-            onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}>
+          <Link to="/clientes" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
             <Users size={20} />
             {sidebarOpen && <span>Clientes</span>}
           </Link>
 
-          <Link to="/articulos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#4338ca'}
-            onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}>
+          <Link to="/articulos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
             <Package size={20} />
             {sidebarOpen && <span>Artículos</span>}
           </Link>
@@ -331,9 +405,7 @@ const RepresentantesPage = () => {
             {sidebarOpen && <span>Representantes</span>}
           </Link>
 
-          <Link to="/divisas" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#4338ca'}
-            onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}>
+          <Link to="/divisas" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
             <DollarSign size={20} />
             {sidebarOpen && <span>Divisas</span>}
           </Link>
@@ -366,9 +438,7 @@ const RepresentantesPage = () => {
                   <input type="text" placeholder="Buscar representantes..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                     style={{ paddingLeft: '40px', paddingTop: '8px', paddingBottom: '8px', paddingRight: '16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box', backgroundColor: '#374151', color: 'white' }} />
                 </div>
-                <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap' }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = '#4338ca'}
-                  onMouseOut={(e) => e.target.style.backgroundColor = '#4f46e5'}>
+                <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap' }}>
                   <Plus size={20} />Nuevo Representante
                 </button>
               </div>
@@ -404,18 +474,9 @@ const RepresentantesPage = () => {
                           <td style={{ padding: '16px 24px', fontSize: '14px' }}>{rep.commission !== null && rep.commission !== undefined ? rep.commission : '-'}</td>
                           <td style={{ padding: '16px 24px' }} onClick={(e) => e.stopPropagation()}>
                             <div style={{ display: 'flex', gap: '8px' }}>
-                              <button onClick={() => handleViewRep(rep)} style={{ padding: '8px', color: '#059669', background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer', transition: 'background-color 0.2s' }}
-                                onMouseOver={(e) => e.target.style.backgroundColor = '#d1fae5'}
-                                onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
-                                title="Ver"><Eye size={16} /></button>
-                              <button onClick={() => handleEdit(rep)} style={{ padding: '8px', color: '#4f46e5', background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer', transition: 'background-color 0.2s' }}
-                                onMouseOver={(e) => e.target.style.backgroundColor = '#eef2ff'}
-                                onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
-                                title="Editar"><Edit2 size={16} /></button>
-                              <button onClick={() => handleDelete(rep)} style={{ padding: '8px', color: '#dc2626', background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer', transition: 'background-color 0.2s' }}
-                                onMouseOver={(e) => e.target.style.backgroundColor = '#fee2e2'}
-                                onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
-                                title="Eliminar"><Trash2 size={16} /></button>
+                              <button onClick={() => handleViewRep(rep)} style={{ padding: '8px', color: '#059669', background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer', transition: 'background-color 0.2s' }} title="Ver"><Eye size={16} /></button>
+                              <button onClick={() => handleEdit(rep)} style={{ padding: '8px', color: '#4f46e5', background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer', transition: 'background-color 0.2s' }} title="Editar"><Edit2 size={16} /></button>
+                              <button onClick={() => handleDelete(rep)} style={{ padding: '8px', color: '#dc2626', background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer', transition: 'background-color 0.2s' }} title="Eliminar"><Trash2 size={16} /></button>
                             </div>
                           </td>
                         </tr>
@@ -460,12 +521,8 @@ const RepresentantesPage = () => {
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
-                    <button onClick={handleCancel} style={{ padding: '8px 24px', border: '1px solid #d1d5db', borderRadius: '8px', color: '#374151', backgroundColor: 'white', cursor: 'pointer', fontWeight: '500' }}
-                      onMouseOver={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                      onMouseOut={(e) => e.target.style.backgroundColor = 'white'}>Volver</button>
-                    <button onClick={() => handleEdit(selectedRep)} style={{ padding: '8px 24px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}
-                      onMouseOver={(e) => e.target.style.backgroundColor = '#4338ca'}
-                      onMouseOut={(e) => e.target.style.backgroundColor = '#4f46e5'}>Editar Representante</button>
+                    <button onClick={handleCancel} style={{ padding: '8px 24px', border: '1px solid #d1d5db', borderRadius: '8px', color: '#374151', backgroundColor: 'white', cursor: 'pointer', fontWeight: '500' }}>Volver</button>
+                    <button onClick={() => handleEdit(selectedRep)} style={{ padding: '8px 24px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}>Editar Representante</button>
                   </div>
                 </>
               )}
