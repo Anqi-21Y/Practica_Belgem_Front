@@ -2,6 +2,7 @@
 import { Plus, Edit2, Trash2, Search, X, Home, Bell, User, Menu, Package, DollarSign, Users, AlertCircle, Eye } from 'lucide-react';
 import { ArticulosService, mapArticuloFromBackend } from '../services/ArticulosService';
 import { Link } from 'react-router-dom';
+import ProfileButton from '../components/ProfileButton'; // 👈 NUEVO
 
 const Articulos = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -397,6 +398,9 @@ const Articulos = () => {
             )}
             <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{getTitle()}</h1>
           </div>
+
+          {/* 👇 BOTÓN DE PERFIL AÑADIDO */}
+          <ProfileButton />
         </header>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>

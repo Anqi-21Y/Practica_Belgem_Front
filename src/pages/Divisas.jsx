@@ -1,8 +1,9 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Home, Users, Menu, Bell, User, Search, Edit2, Trash2, Plus, X, Eye, Package, DollarSign, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ProfileButton from '../components/ProfileButton'; // 👈 NUEVO
 
-// ConfiguraciÃ³n de la API
+// Configuración de la API
 const API_BASE_URL = 'http://localhost:8080/divisas';
 
 const getHeaders = () => ({
@@ -181,7 +182,7 @@ const DivisasPage = () => {
 
   const handleSave = async () => {
     if (!formData.code || !formData.name) {
-      alert('Por favor completa todos los campos obligatorios (CÃ³digo y Nombre)');
+      alert('Por favor completa todos los campos obligatorios (Código y Nombre)');
       return;
     }
 
@@ -416,6 +417,9 @@ const DivisasPage = () => {
             )}
             <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{getTitle()}</h1>
           </div>
+
+          {/* 👇 BOTÓN DE PERFIL AÑADIDO */}
+          <ProfileButton />
         </header>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
