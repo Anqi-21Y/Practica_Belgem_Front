@@ -1,8 +1,9 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Home, Users, Menu, Bell, User, Search, Edit2, Trash2, Plus, X, Eye, AlertCircle, Package, DollarSign } from 'lucide-react';
+import { Home, Users, Menu, User, Search, Edit2, Trash2, Plus, X, Eye, AlertCircle, Package, DollarSign } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ProfileButton from '../components/ProfileButton';
 
-// ConfiguraciÃ³n de la API
+// Configuración de la API
 const API_BASE_URL = 'http://localhost:8080/clientes';
 
 const getHeaders = () => ({
@@ -496,6 +497,8 @@ const ClientesPage = () => {
             )}
             <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{getTitle()}</h1>
           </div>
+
+          <ProfileButton />
         </header>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
