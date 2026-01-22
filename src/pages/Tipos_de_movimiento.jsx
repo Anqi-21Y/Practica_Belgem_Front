@@ -1,0 +1,403 @@
+import React, { useState } from 'react';
+import { Eye, Edit2, Trash2, Search, Home, Package, Warehouse, TrendingUp, FileText, Menu, Plus, X, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const TiposMovimientoPage = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedTipo, setSelectedTipo] = useState(null);
+  const [viewMode, setViewMode] = useState('list');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [tipos, setTipos] = useState([
+    { id: 1, nombre: 'Entrada por compra', descripcion: 'Incremento de stock por compra a proveedor' },
+    { id: 2, nombre: 'Salida por venta', descripcion: 'Disminución de stock por venta al cliente' },
+    { id: 3, nombre: 'Ajuste de inventario', descripcion: 'Corrección de diferencias en el stock físico' },
+    { id: 4, nombre: 'Transferencia entre almacenes', descripcion: 'Movimiento de productos entre ubicaciones' },
+    { id: 5, nombre: 'Devolución de cliente', descripcion: 'Reingreso de productos devueltos por clientes' },
+    { id: 6, nombre: 'Merma', descripcion: 'Pérdida de productos por deterioro o vencimiento' }
+  ]);
+
+  const [formData, setFormData] = useState({
+    id: '',
+    nombre: '',
+    descripcion: ''
+  });
+
+
+  const handleViewTipo = (tipo) => {
+    setSelectedTipo(tipo);
+    setViewMode('view');
+  };
+
+  const handleEdit = (tipo) => {
+    setSelectedTipo(tipo);
+    setFormData({
+      id: tipo.id,
+      nombre: tipo.nombre || '',
+      descripcion: tipo.descripcion || ''
+    });
+    setViewMode('edit');
+  };
+
+  const handleDelete = (tipo) => {
+    const confirmDelete = window.confirm(
+      `¿Estás seguro de que deseas eliminar el tipo de movimiento "${tipo.nombre}"?\n\nEsta acción no se puede deshacer.`
+    );
+
+    if (confirmDelete) {
+      setTipos(tipos.filter(t => t.id !== tipo.id));
+      alert(`Tipo de movimiento "${tipo.nombre}" eliminado correctamente`);
+    }
+  };
+
+  const handleNew = () => {
+    setSelectedTipo(null);
+    setFormData({
+      id: '',
+      nombre: '',
+      descripcion: ''
+    });
+    setViewMode('create');
+  };
+
+  const handleSave = () => {
+    if (!formData.nombre || !formData.descripcion) {
+      alert('Por favor completa todos los campos obligatorios');
+      return;
+    }
+
+    if (viewMode === 'edit') {
+      setTipos(tipos.map(t =>
+        t.id === selectedTipo.id
+          ? { ...t, nombre: formData.nombre, descripcion: formData.descripcion }
+          : t
+      ));
+      alert('Tipo de movimiento actualizado correctamente');
+    } else {
+      const newTipo = {
+        id: Math.max(...tipos.map(t => t.id), 0) + 1,
+        nombre: formData.nombre,
+        descripcion: formData.descripcion
+      };
+      setTipos([...tipos, newTipo]);
+      alert('Tipo de movimiento creado correctamente');
+    }
+
+    setViewMode('list');
+    setSelectedTipo(null);
+  };
+
+  const handleCancel = () => {
+    setViewMode('list');
+    setSelectedTipo(null);
+    setError(null);
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const filteredTipos = tipos.filter(tipo =>
+    tipo.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    tipo.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getTitle = () => {
+    switch (viewMode) {
+      case 'view': return 'Detalles del Tipo de Movimiento';
+      case 'edit': return 'Editar Tipo de Movimiento';
+      case 'create': return 'Nuevo Tipo de Movimiento';
+      default: return 'Tipos de Movimiento';
+    }
+  };
+
+  const ErrorAlert = ({ message }) => (
+    <div style={{
+      backgroundColor: '#fee2e2',
+      border: '1px solid #fecaca',
+      borderRadius: '8px',
+      padding: '12px 16px',
+      marginBottom: '16px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      color: '#dc2626'
+    }}>
+      <AlertCircle size={20} />
+      <span>{message}</span>
+    </div>
+  );
+
+  const renderForm = () => (
+    <div style={{
+      backgroundColor: 'white',
+      borderRadius: '8px',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+      padding: '24px',
+      maxWidth: '896px'
+    }}>
+      {error && <ErrorAlert message={error} />}
+
+      <div style={{ display: 'grid', gap: '24px' }}>
+        <div>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+            Nombre *
+          </label>
+          <input
+            type="text"
+            value={formData.nombre}
+            onChange={(e) => handleInputChange('nombre', e.target.value)}
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              outline: 'none',
+              boxSizing: 'border-box',
+              backgroundColor: loading ? '#f3f4f6' : 'white',
+              color: '#000000'
+            }}
+            placeholder="Ej: Entrada por compra"
+          />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+            Descripción *
+          </label>
+          <textarea
+            value={formData.descripcion}
+            onChange={(e) => handleInputChange('descripcion', e.target.value)}
+            disabled={loading}
+            rows="4"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              outline: 'none',
+              boxSizing: 'border-box',
+              backgroundColor: loading ? '#f3f4f6' : 'white',
+              color: '#000000',
+              resize: 'vertical',
+              fontFamily: 'system-ui'
+            }}
+            placeholder="Ingrese una descripción detallada del tipo de movimiento"
+          />
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
+        <button
+          onClick={handleCancel}
+          disabled={loading}
+          style={{
+            padding: '8px 24px',
+            border: '1px solid #d1d5db',
+            borderRadius: '8px',
+            color: '#374151',
+            backgroundColor: 'white',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: '500',
+            opacity: loading ? 0.6 : 1
+          }}
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          style={{
+            padding: '8px 24px',
+            backgroundColor: loading ? '#9ca3af' : '#4f46e5',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: '500',
+            opacity: loading ? 0.6 : 1
+          }}
+        >
+          {loading ? 'Guardando...' : 'Guardar Cambios'}
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f9fafb', fontFamily: 'system-ui' }}>
+      {/* Sidebar */}
+      <div style={{ width: sidebarOpen ? '256px' : '80px', backgroundColor: '#312e81', color: 'white', transition: 'width 0.3s', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #4338ca' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '32px', height: '32px', backgroundColor: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: '#312e81', fontWeight: 'bold', fontSize: '14px' }}>A</span>
+            </div>
+            {sidebarOpen && <span style={{ fontWeight: '600' }}>Admin Portal</span>}
+          </div>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ padding: '4px', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '4px' }}>
+            <Menu size={20} />
+          </button>
+        </div>
+
+        <nav style={{ flex: 1, padding: '16px' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+            <Home size={20} />
+            {sidebarOpen && <span>Inicio</span>}
+          </Link>
+
+          <Link to="/articulos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+            <Package size={20} />
+            {sidebarOpen && <span>Artículos</span>}
+          </Link>
+
+          <Link to="/almacenes" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+            <Warehouse size={20} />
+            {sidebarOpen && <span>Almacenes</span>}
+          </Link>
+
+          <Link to="/movimientos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+            <TrendingUp size={20} />
+            {sidebarOpen && <span>Movimientos</span>}
+          </Link>
+
+          <Link to="/tipos-movimiento" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white', marginBottom: '8px' }}>
+            <FileText size={20} />
+            {sidebarOpen && <span>Tipos de Movimiento</span>}
+          </Link>
+
+          <Link to="/reportes" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+            <FileText size={20} />
+            {sidebarOpen && <span>Reportes</span>}
+          </Link>
+        </nav>
+      </div>
+
+      {/* Main */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e5e7eb', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {viewMode !== 'list' && (
+              <button onClick={handleCancel} style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            )}
+            <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{getTitle()}</h1>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '40px', height: '40px', backgroundColor: '#4f46e5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '600' }}>
+              U
+            </div>
+          </div>
+        </header>
+
+        <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
+          {error && viewMode === 'list' && <ErrorAlert message={error} />}
+
+          {viewMode === 'list' ? (
+            <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ position: 'relative', flexGrow: 1, minWidth: '250px' }}>
+                  <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                  <input type="text" placeholder="Buscar tipos de movimiento..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ paddingLeft: '40px', paddingTop: '8px', paddingBottom: '8px', paddingRight: '16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
+                </div>
+                <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap' }}>
+                  <Plus size={20} />Nuevo Tipo
+                </button>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                    <tr>
+                      {['Nombre', 'Descripción', 'Acciones'].map(h => (
+                        <th key={h} style={{ padding: '12px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredTipos.length === 0 ? (
+                      <tr>
+                        <td colSpan="3" style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>
+                          No se encontraron tipos de movimiento
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredTipos.map((tipo) => (
+                        <tr key={tipo.id}
+                          style={{ borderBottom: '1px solid #e5e7eb', transition: 'background-color 0.2s' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                          <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: '500' }}>{tipo.nombre}</td>
+                          <td style={{ padding: '16px 24px', fontSize: '14px' }}>{tipo.descripcion}</td>
+                          <td style={{ padding: '16px 24px' }}>
+                            <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>
+                              <button onClick={() => handleViewTipo(tipo)} style={{ padding: '0', color: '#9ca3af', background: 'transparent', border: 'none', cursor: 'pointer', transition: 'color 0.2s' }} title="Ver"
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#6b7280'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}>
+                                <Eye size={20} />
+                              </button>
+                              <button onClick={() => handleEdit(tipo)} style={{ padding: '0', color: '#9ca3af', background: 'transparent', border: 'none', cursor: 'pointer', transition: 'color 0.2s' }} title="Editar"
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#6b7280'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}>
+                                <Edit2 size={20} />
+                              </button>
+                              <button onClick={() => handleDelete(tipo)} style={{ padding: '0', color: '#9ca3af', background: 'transparent', border: 'none', cursor: 'pointer', transition: 'color 0.2s' }} title="Eliminar"
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#dc2626'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}>
+                                <Trash2 size={20} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : viewMode === 'view' ? (
+            <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '32px', maxWidth: '896px' }}>
+              <div style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '2px solid #e5e7eb' }}>
+                <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>{selectedTipo?.nombre}</h2>
+                <span style={{
+                  padding: '6px 12px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  borderRadius: '9999px',
+                  backgroundColor: '#dbeafe',
+                  color: '#2563eb'
+                }}>
+                  Tipo de Movimiento
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gap: '24px' }}>
+                <div>
+                  <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', marginBottom: '8px' }}>Nombre</h3>
+                  <p style={{ fontSize: '16px', margin: 0 }}>{selectedTipo?.nombre}</p>
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', marginBottom: '8px' }}>Descripción</h3>
+                  <p style={{ fontSize: '16px', margin: 0, lineHeight: '1.6' }}>{selectedTipo?.descripcion}</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
+                <button onClick={handleCancel} style={{ padding: '8px 24px', border: '1px solid #d1d5db', borderRadius: '8px', color: '#374151', backgroundColor: 'white', cursor: 'pointer', fontWeight: '500' }}>Volver</button>
+                <button onClick={() => handleEdit(selectedTipo)} style={{ padding: '8px 24px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}>Editar Tipo</button>
+              </div>
+            </div>
+          ) : renderForm()}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TiposMovimientoPage;

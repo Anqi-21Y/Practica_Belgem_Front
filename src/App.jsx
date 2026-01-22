@@ -8,6 +8,7 @@ import Representantes from "./pages/Representantes";
 import Divisas from "./pages/Divisas";
 import SeleccionUsuario from "./pages/SeleccionUsuario";
 import Perfil from "./pages/Perfil";
+import Tipos_movimiento from "./pages/Tipos_de_movimiento";
 import './App.css';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
             <Route path="articulos" element={<Articulos />} />
             <Route path="representantes" element={<Representantes />} />
             <Route path="divisas" element={<Divisas />} />
+            <Route path="tipos_movimiento" element={<Tipos_movimiento />} />
           </Route>
         </Routes>
       </BrowserRouter>
