@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, Edit2, Trash2, Search, Home, Package, Warehouse, TrendingUp, FileText, Menu, Plus, X, AlertCircle } from 'lucide-react';
+import { Eye, Edit2, Trash2, Search, Home, Package,Users, DollarSign , FileText, Menu, Plus, X, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const TiposMovimientoPage = () => {
@@ -235,37 +235,132 @@ const TiposMovimientoPage = () => {
           </button>
         </div>
 
-        <nav style={{ flex: 1, padding: '16px' }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+        <nav style={{ flex: 1, padding: '16px', overflowY: 'auto' }}>
+
+          <Link
+            to="/"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              color: 'white',
+              marginBottom: '8px'
+            }}
+          >
             <Home size={20} />
-            {sidebarOpen && <span>Inicio</span>}
+            {sidebarOpen && <span style={{ whiteSpace: 'nowrap' }}>Home</span>}
           </Link>
 
-          <Link to="/articulos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+          <Link
+            to="/clientes"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              color: 'white',
+              marginBottom: '8px'
+            }}
+          >
+            <Users size={20} />
+            {sidebarOpen && <span style={{ whiteSpace: 'nowrap' }}>Clientes</span>}
+          </Link>
+
+          <Link
+            to="/articulos"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              color: 'white',
+              marginBottom: '8px'
+            }}
+          >
             <Package size={20} />
-            {sidebarOpen && <span>Artículos</span>}
+            {sidebarOpen && <span style={{ whiteSpace: 'nowrap' }}>Artículos</span>}
           </Link>
 
-          <Link to="/almacenes" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
-            <Warehouse size={20} />
-            {sidebarOpen && <span>Almacenes</span>}
+          <Link
+            to="/representantes"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              color: 'white',
+              marginBottom: '8px'
+            }}
+          >
+            <Users size={20} />
+            {sidebarOpen && <span style={{ whiteSpace: 'nowrap' }}>Representantes</span>}
           </Link>
 
-          <Link to="/movimientos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
-            <TrendingUp size={20} />
-            {sidebarOpen && <span>Movimientos</span>}
+          <Link
+            to="/divisas"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              color: 'white',
+              marginBottom: '8px'
+            }}
+          >
+            <DollarSign size={20} />
+            {sidebarOpen && <span style={{ whiteSpace: 'nowrap' }}>Divisas</span>}
           </Link>
 
-          <Link to="/tipos-movimiento" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white', marginBottom: '8px' }}>
+          <Link
+            to="/tipos-movimiento"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              borderRadius: '12px',
+              backgroundColor: '#4338ca',
+              color: 'white',
+              textDecoration: 'none',
+              marginBottom: '8px'
+            }}
+          >
             <FileText size={20} />
-            {sidebarOpen && <span>Tipos de Movimiento</span>}
+            {sidebarOpen && (
+              <span style={{ whiteSpace: 'nowrap' }}>Tipos de Movimiento</span>
+            )}
           </Link>
 
-          <Link to="/reportes" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
+          <Link
+            to="/reportes"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              color: 'white',
+              marginBottom: '8px'
+            }}
+          >
             <FileText size={20} />
-            {sidebarOpen && <span>Reportes</span>}
+            {sidebarOpen && <span style={{ whiteSpace: 'nowrap' }}>Reportes</span>}
           </Link>
+
         </nav>
+
       </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
