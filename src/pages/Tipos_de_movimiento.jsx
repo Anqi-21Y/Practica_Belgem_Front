@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Eye, Edit2, Trash2, Search, Home, Package, Users, DollarSign, FileText, Menu, Plus, X, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+
 // Configuración de la API - igual que en Representante
 //API CONFIG
 
@@ -224,6 +225,39 @@ const TiposMovimientoPage = () => {
     }
   };
 
+  const ErrorAlert = ({ message }) => (
+    <div style={{
+      backgroundColor: '#fee2e2',
+      border: '1px solid #fecaca',
+      borderRadius: '8px',
+      padding: '12px 16px',
+      marginBottom: '16px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      color: '#dc2626'
+    }}>
+      <AlertCircle size={20} />
+      <span>{message}</span>
+    </div>
+  );
+
+    const LoadingSpinner = () => (
+    <div style={{ textAlign: 'center', padding: '40px' }}>
+      <div style={{
+        width: '40px',
+        height: '40px',
+        border: '4px solid #e5e7eb',
+        borderTop: '4px solid #4f46e5',
+        borderRadius: '50%',
+        animation: 'spin 1s linear infinite',
+        margin: '0 auto'
+      }} />
+      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+      <p style={{ marginTop: '16px', color: '#6b7280' }}>Cargando...</p>
+    </div>
+  );
+
   // FORM RENDER
 
   const renderForm = () => (
@@ -252,8 +286,35 @@ const TiposMovimientoPage = () => {
       </div>
 
       <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-        <button onClick={handleCancel}>Cancelar</button>
-        <button onClick={handleSave} disabled={loading}>
+        <button
+          onClick={handleCancel}
+          disabled={loading}
+          style={{
+            padding: '8px 24px',
+            border: '1px solid #d1d5db',
+            borderRadius: '8px',
+            color: '#374151',
+            backgroundColor: 'white',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: '500',
+            opacity: loading ? 0.6 : 1
+          }}
+        >Cancelar</button>
+        
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          style={{
+            padding: '8px 24px',
+            backgroundColor: loading ? '#9ca3af' : '#4f46e5',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: '500',
+            opacity: loading ? 0.6 : 1
+          }}
+        >
           {loading ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
@@ -416,7 +477,10 @@ const TiposMovimientoPage = () => {
         </header>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
-          {viewMode === 'list' ? (
+          {error && viewMode === 'list' && <ErrorAlert message={error} />}
+          {loading && viewMode === 'list' ? (
+            <LoadingSpinner />
+          ) : viewMode === 'list' ? (
             <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
               <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ position: 'relative', flexGrow: 1, minWidth: '250px' }}>
@@ -472,7 +536,14 @@ const TiposMovimientoPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredTipos.map((tipo) => (
+                    {filteredTipos.length === 0 ? (
+                      <tr>
+                        <td colSpan="3" style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>
+                          No se encontraron tipos de movimiento
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredTipos.map((tipo) => (
                       <tr
                         key={tipo.id}
                         style={{
@@ -499,7 +570,8 @@ const TiposMovimientoPage = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    ))
+                  )}
                   </tbody>
                 </table>
               </div>
