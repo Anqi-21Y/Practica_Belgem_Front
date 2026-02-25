@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, Edit2, Trash2, Search, Home, Package, Users, DollarSign, FileText, Menu, Plus, X, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
+import ProfileButton from '../components/ProfileButton';
 
 // Configuración de la API - igual que en Representante
 //API CONFIG
@@ -474,6 +474,7 @@ const TiposMovimientoPage = () => {
             )}
             <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{getTitle()}</h1>
           </div>
+          <ProfileButton />
         </header>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
