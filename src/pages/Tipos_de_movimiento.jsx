@@ -300,7 +300,7 @@ const TiposMovimientoPage = () => {
             opacity: loading ? 0.6 : 1
           }}
         >Cancelar</button>
-        
+
         <button
           onClick={handleSave}
           disabled={loading}
@@ -315,7 +315,7 @@ const TiposMovimientoPage = () => {
             opacity: loading ? 0.6 : 1
           }}
         >
-          {loading ? 'Guardando...' : 'Guardar'}
+          {loading ? 'Guardando...' : 'Guardar Cambios'}
         </button>
       </div>
     </div>
