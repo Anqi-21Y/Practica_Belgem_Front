@@ -1,23 +1,87 @@
-import React, { useState } from 'react';
-import { Eye, Edit2, Trash2, Search, Home, Package,Users, DollarSign , FileText, Menu, Plus, X, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Eye, Edit2, Trash2, Search, Home, Package, Users, DollarSign, FileText, Menu, Plus, X, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+// Configuración de la API - igual que en Representante
+//API CONFIG
+
+const API_BASE_URL = 'http://localhost:8080/tipos-movimiento';
+
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Accept': 'application/json'
+});
+
+const handleResponse = async (response) => {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error ${response.status}: ${errorText || response.statusText}`);
+  }
+
+  if (response.status === 204) return null;
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+};
+
+//SERVICE
+
+const TipoMovimientoService = {
+
+  listarTipos: async () => {
+    const response = await fetch(API_BASE_URL, {
+      method: 'GET',
+      headers: getHeaders()
+    });
+    return await handleResponse(response);
+  },
+
+  obtenerTipoPorId: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'GET',
+      headers: getHeaders()
+    });
+    return await handleResponse(response);
+  },
+
+  crearTipo: async (tipoData) => {
+    const response = await fetch(API_BASE_URL, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(tipoData)
+    });
+    return await handleResponse(response);
+  },
+
+  actualizarTipo: async (id, tipoData) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(tipoData)
+    });
+    return await handleResponse(response);
+  },
+
+  eliminarTipo: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    return await handleResponse(response);
+  }
+};
+
+// COMPONENT
+
 const TiposMovimientoPage = () => {
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedTipo, setSelectedTipo] = useState(null);
   const [viewMode, setViewMode] = useState('list');
   const [searchTerm, setSearchTerm] = useState('');
+  const [tipos, setTipos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const [tipos, setTipos] = useState([
-    { id: 1, nombre: 'Entrada por compra', descripcion: 'Incremento de stock por compra a proveedor' },
-    { id: 2, nombre: 'Salida por venta', descripcion: 'Disminución de stock por venta al cliente' },
-    { id: 3, nombre: 'Ajuste de inventario', descripcion: 'Corrección de diferencias en el stock físico' },
-    { id: 4, nombre: 'Transferencia entre almacenes', descripcion: 'Movimiento de productos entre ubicaciones' },
-    { id: 5, nombre: 'Devolución de cliente', descripcion: 'Reingreso de productos devueltos por clientes' },
-    { id: 6, nombre: 'Merma', descripcion: 'Pérdida de productos por deterioro o vencimiento' }
-  ]);
 
   const [formData, setFormData] = useState({
     id: '',
@@ -25,9 +89,41 @@ const TiposMovimientoPage = () => {
     descripcion: ''
   });
 
-  const handleViewTipo = (tipo) => {
-    setSelectedTipo(tipo);
-    setViewMode('view');
+  //LOAD DATA
+
+  useEffect(() => {
+    cargarTipos();
+  }, []);
+
+  const cargarTipos = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await TipoMovimientoService.listarTipos();
+      setTipos(data || []);
+    } catch (err) {
+      setError('Error al cargar los tipos: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //CRUD HANDLERS
+
+  const handleViewTipo = async (tipo) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await TipoMovimientoService.obtenerTipoPorId(tipo.id);
+      setSelectedTipo(data);
+      setViewMode('view');
+    } catch (err) {
+      setError('Error al obtener el tipo: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEdit = (tipo) => {
@@ -40,14 +136,25 @@ const TiposMovimientoPage = () => {
     setViewMode('edit');
   };
 
-  const handleDelete = (tipo) => {
+  const handleDelete = async (tipo) => {
+
     const confirmDelete = window.confirm(
-      `¿Estás seguro de que deseas eliminar el tipo de movimiento "${tipo.nombre}"?\n\nEsta acción no se puede deshacer.`
+      `¿Estás seguro de eliminar "${tipo.nombre}"?\n\nEsta acción no se puede deshacer.`
     );
 
-    if (confirmDelete) {
-      setTipos(tipos.filter(t => t.id !== tipo.id));
-      alert(`Tipo de movimiento "${tipo.nombre}" eliminado correctamente`);
+    if (!confirmDelete) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await TipoMovimientoService.eliminarTipo(tipo.id);
+      alert('Tipo eliminado correctamente');
+      await cargarTipos();
+    } catch (err) {
+      setError('Error al eliminar: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,31 +164,40 @@ const TiposMovimientoPage = () => {
     setViewMode('create');
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+
     if (!formData.nombre || !formData.descripcion) {
-      alert('Por favor completa todos los campos obligatorios');
+      alert('Completa todos los campos obligatorios');
       return;
     }
 
-    if (viewMode === 'edit') {
-      setTipos(tipos.map(t =>
-        t.id === selectedTipo.id
-          ? { ...t, nombre: formData.nombre, descripcion: formData.descripcion }
-          : t
-      ));
-      alert('Tipo de movimiento actualizado correctamente');
-    } else {
-      const newTipo = {
-        id: Math.max(...tipos.map(t => t.id), 0) + 1,
-        nombre: formData.nombre,
-        descripcion: formData.descripcion
-      };
-      setTipos([...tipos, newTipo]);
-      alert('Tipo de movimiento creado correctamente');
-    }
+    setLoading(true);
+    setError(null);
 
-    setViewMode('list');
-    setSelectedTipo(null);
+    const dataToSend = {
+      nombre: formData.nombre,
+      descripcion: formData.descripcion
+    };
+
+    try {
+
+      if (viewMode === 'edit') {
+        await TipoMovimientoService.actualizarTipo(selectedTipo.id, dataToSend);
+        alert('Tipo actualizado correctamente');
+      } else {
+        await TipoMovimientoService.crearTipo(dataToSend);
+        alert('Tipo creado correctamente');
+      }
+
+      await cargarTipos();
+      setViewMode('list');
+      setSelectedTipo(null);
+
+    } catch (err) {
+      setError('Error al guardar: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -91,7 +207,7 @@ const TiposMovimientoPage = () => {
   };
 
   const handleInputChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const filteredTipos = tipos.filter(tipo =>
@@ -108,113 +224,37 @@ const TiposMovimientoPage = () => {
     }
   };
 
-  const ErrorAlert = ({ message }) => (
-    <div style={{
-      backgroundColor: '#fee2e2',
-      border: '1px solid #fecaca',
-      borderRadius: '8px',
-      padding: '12px 16px',
-      marginBottom: '16px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      color: '#dc2626'
-    }}>
-      <AlertCircle size={20} />
-      <span>{message}</span>
-    </div>
-  );
+  // FORM RENDER
 
   const renderForm = () => (
-    <div style={{
-      backgroundColor: 'white',
-      borderRadius: '8px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-      padding: '24px',
-      maxWidth: '896px'
-    }}>
+    <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '8px', maxWidth: '800px' }}>
       {error && <ErrorAlert message={error} />}
 
       <div style={{ display: 'grid', gap: '24px' }}>
         <div>
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-            Nombre *
-          </label>
+          <label>Nombre *</label>
           <input
-            type="text"
             value={formData.nombre}
             onChange={(e) => handleInputChange('nombre', e.target.value)}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              outline: 'none',
-              boxSizing: 'border-box',
-              backgroundColor: loading ? '#f3f4f6' : 'white',
-              color: '#000000'
-            }}
+            style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #ccc' }}
           />
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-            Descripción *
-          </label>
+          <label>Descripción *</label>
           <textarea
             value={formData.descripcion}
             onChange={(e) => handleInputChange('descripcion', e.target.value)}
-            disabled={loading}
-            rows="4"
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              outline: 'none',
-              boxSizing: 'border-box',
-              backgroundColor: loading ? '#f3f4f6' : 'white',
-              color: '#000000',
-              resize: 'vertical',
-              fontFamily: 'system-ui'
-            }}
+            rows={4}
+            style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #ccc' }}
           />
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
-        <button
-          onClick={handleCancel}
-          disabled={loading}
-          style={{
-            padding: '8px 24px',
-            border: '1px solid #d1d5db',
-            borderRadius: '8px',
-            color: '#374151',
-            backgroundColor: 'white',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontWeight: '500',
-            opacity: loading ? 0.6 : 1
-          }}
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={loading}
-          style={{
-            padding: '8px 24px',
-            backgroundColor: loading ? '#9ca3af' : '#4f46e5',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontWeight: '500',
-            opacity: loading ? 0.6 : 1
-          }}
-        >
-          {loading ? 'Guardando...' : 'Guardar Cambios'}
+      <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+        <button onClick={handleCancel}>Cancelar</button>
+        <button onClick={handleSave} disabled={loading}>
+          {loading ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
     </div>
