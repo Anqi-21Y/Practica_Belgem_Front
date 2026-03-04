@@ -4,8 +4,8 @@
  *
  * Base URL: http://localhost:8080/movimientos-stock
  */
-const API_BASE_URL = 'http://localhost:8080/movimientos-stock';
-const STOCK_ACTUAL_URL = 'http://localhost:8080/stock-actual';
+const API_BASE_URL = 'http://localhost:8080/api/v1/movimientos-stock';
+const STOCK_ACTUAL_URL = 'http://localhost:8080/api/v1/stock-actual';
 
 /**
  * Configuración común para las peticiones fetch

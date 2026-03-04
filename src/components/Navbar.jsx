@@ -6,8 +6,9 @@ export default function Navbar() {
       <Link to="/" style={{ color: "white", marginRight: "15px" }}>Inicio</Link>
       <Link to="/clientes" style={{ color: "white", marginRight: "15px" }}>Clientes</Link>
       <Link to="/articulos" style={{ color: "white", marginRight: "15px" }}>Artículos</Link>
-      <Link to="/representantes" style={{ color: "white", marginRight: "15px"}}>Representantes</Link>
+      <Link to="/representantes" style={{ color: "white", marginRight: "15px" }}>Representantes</Link>
       <Link to="/divisas" style={{ color: "white" }}>Divisas</Link>
+      <Link to="/proveedores" style={{ color: "white" }}>Proveedores</Link>
     </nav>
   );
 }

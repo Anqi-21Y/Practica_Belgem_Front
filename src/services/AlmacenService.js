@@ -5,7 +5,7 @@
  * Base URL: http://localhost:8080/almacenes
  */
 
-const API_BASE_URL = 'http://localhost:8080/almacenes';
+const API_BASE_URL = 'http://localhost:8080/api/v1/almacenes';
 
 /**
  * Configuración común para las peticiones fetch
