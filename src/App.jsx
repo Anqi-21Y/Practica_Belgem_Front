@@ -8,6 +8,11 @@ import Representantes from "./pages/Representantes";
 import Divisas from "./pages/Divisas";
 import SeleccionUsuario from "./pages/SeleccionUsuario";
 import Perfil from "./pages/Perfil";
+import ProveedoresPage from "./pages/Proveedores";
+import AlmacenesPage from "./pages/Almacen";
+import MovimientoStockPage from "./pages/MovimientoStock";
+import PedidosPage from "./pages/Pedidos";
+import TiposMovimientoPage from "./pages/TiposMovimiento";
 import './App.css';
 
 function App() {
@@ -26,6 +31,11 @@ function App() {
             <Route path="articulos" element={<Articulos />} />
             <Route path="representantes" element={<Representantes />} />
             <Route path="divisas" element={<Divisas />} />
+            <Route path="proveedores" element={<ProveedoresPage />} />
+            <Route path="almacenes" element={<AlmacenesPage />} />
+            <Route path="movimientos" element={<MovimientoStockPage />} />
+            <Route path="pedidos" element={<PedidosPage />} />
+            <Route path="tipos-movimiento" element={<TiposMovimientoPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
