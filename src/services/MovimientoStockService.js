@@ -2,10 +2,10 @@
  * Servicio para gestionar las operaciones CRUD de Movimientos de Stock
  * mediante comunicación con el backend REST API.
  *
- * Base URL: http://localhost:8080/movimientos-stock
+ * Base URL: /api/v1/movimientos-stock
  */
-const API_BASE_URL = 'http://localhost:8080/api/v1/movimientos-stock';
-const STOCK_ACTUAL_URL = 'http://localhost:8080/api/v1/stock-actual';
+const API_BASE_URL = '/api/v1/movimientos-stock';
+const STOCK_ACTUAL_URL = '/api/v1/stock-actual';
 
 /**
  * Configuración común para las peticiones fetch

@@ -1,6 +1,6 @@
 import mockUsuarios from './mockUsuarios';
 
-const API_BASE_URL = 'http://localhost:8080/usuarios';
+const API_BASE_URL = '/api/v1/usuarios';
 const USE_MOCK = true; // Cambia a false cuando el backend esté listo
 
 const getHeaders = () => ({

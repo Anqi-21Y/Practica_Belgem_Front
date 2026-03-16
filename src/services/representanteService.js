@@ -2,10 +2,10 @@
  * Servicio para gestionar las operaciones CRUD de representantes
  * mediante comunicación con el backend REST API.
  * 
- * Base URL: http://localhost:8080/api/v1/representantes
+ * Base URL: /api/v1/representantes
  */
 
-const API_BASE_URL = 'http://localhost:8080/api/v1/representantes';
+const API_BASE_URL = '/api/v1/representantes';
 
 /**
  * Configuración común para las peticiones fetch

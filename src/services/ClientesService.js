@@ -5,7 +5,7 @@
  * Base URL: Asegúrate de configurar la URL correcta de tu backend
  */
 
-const API_BASE_URL = 'http://localhost:8080/api/v1/clientes';
+const API_BASE_URL = '/api/v1/clientes';
 
 /**
  * Configuración común para las peticiones fetch

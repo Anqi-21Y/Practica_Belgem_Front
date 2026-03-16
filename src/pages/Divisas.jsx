@@ -2,7 +2,7 @@
 import { Search, Edit2, Trash2, Plus, X, Eye, AlertCircle } from 'lucide-react';
 import ProfileButton from '../components/ProfileButton';
 
-const API_BASE_URL = 'http://localhost:8080/divisas';
+const API_BASE_URL = '/api/v1/divisas';
 
 const getHeaders = () => ({ 'Content-Type': 'application/json', 'Accept': 'application/json' });
 
