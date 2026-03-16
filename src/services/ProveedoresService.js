@@ -2,10 +2,10 @@
  * Servicio para gestionar las operaciones CRUD de proveedores
  * mediante comunicación con el backend REST API.
  *
- * Base URL: http://localhost:8080/proveedores
+ * Base URL: /api/v1/proveedores
  */
 
-const API_BASE_URL = 'http://localhost:8080/proveedores';
+const API_BASE_URL = '/api/v1/proveedores';
 
 /**
  * Configuración común para las peticiones fetch
