@@ -1,115 +1,88 @@
-import React from 'react';
-import { User } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
+import { User, LogOut, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 
-/**
- * Botón de perfil reutilizable para añadir en cualquier página
- * Muestra un dropdown con opciones del usuario
- */
+const rolConfig = {
+    'ADMIN':         { color: '#1d4ed8', bg: '#eff6ff' },
+    'REPRESENTANTE': { color: '#7c3aed', bg: '#f5f3ff' },
+    'CLIENTE':       { color: '#059669', bg: '#f0fdf4' },
+    'default':       { color: '#475569', bg: '#f8fafc' },
+};
+const getRol = (rol) => rolConfig[rol] || rolConfig.default;
+
 export default function ProfileButton() {
     const { usuarioActivo, cerrarSesion } = useUser();
     const navigate = useNavigate();
-    const [isOpen, setIsOpen] = React.useState(false);
-    const dropdownRef = React.useRef(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const ref = useRef(null);
 
-    // Cerrar dropdown al hacer click fuera
-    React.useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+    // Cerrar al click fuera
+    useEffect(() => {
+        const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setIsOpen(false); };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    // Usuario por defecto si no hay usuario activo (para desarrollo)
-    const usuario = usuarioActivo || {
-        nombre: 'Invitado',
-        rol: 'Sin sesión',
-        email: null
-    };
+    const usuario = usuarioActivo || { nombre: 'Invitado', rol: 'Sin sesión', email: null };
+    const rc = getRol(usuario.rol);
+    const initial = usuario.nombre.charAt(0).toUpperCase();
 
-    const handleVerPerfil = () => {
-        setIsOpen(false);
-        if (usuarioActivo) {
-            navigate('/perfil');
-        } else {
-            navigate('/seleccion-usuario');
-        }
-    };
-
-    const handleCambiarUsuario = () => {
-        setIsOpen(false);
-        cerrarSesion();
-        navigate('/seleccion-usuario');
-    };
-
-    const handleIniciarSesion = () => {
-        setIsOpen(false);
-        navigate('/seleccion-usuario');
-    };
+    const close = (fn) => { setIsOpen(false); fn && fn(); };
 
     return (
-        <div style={styles.container} ref={dropdownRef}>
+        <div style={{ position: 'relative', fontFamily: "'Inter', system-ui, sans-serif" }} ref={ref}>
+            {/* Trigger button */}
             <button
-                onClick={() => setIsOpen(!isOpen)}
-                style={{
-                    ...styles.button,
-                    ...(usuarioActivo ? {} : styles.buttonInactive)
-                }}
-                title="Mi perfil"
+                onClick={() => setIsOpen(o => !o)}
+                style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '5px 10px 5px 5px', backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '6px', cursor: 'pointer', transition: 'border-color 0.15s', ...(isOpen ? { borderColor: '#bfdbfe' } : {}) }}
             >
-                <div style={{
-                    ...styles.avatar,
-                    backgroundColor: usuarioActivo ? '#4f46e5' : '#9ca3af'
-                }}>
-                    {usuario.nombre.charAt(0).toUpperCase()}
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: usuarioActivo ? rc.color : '#94a3b8', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                    {initial}
                 </div>
-                <div style={styles.info}>
-                    <span style={styles.name}>{usuario.nombre}</span>
-                    <span style={styles.role}>{usuario.rol}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: '90px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a', lineHeight: 1.3 }}>{usuario.nombre}</span>
+                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>{usuario.rol}</span>
                 </div>
+                <span style={{ color: '#94a3b8', display: 'flex', marginLeft: '2px' }}>
+                    {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </span>
             </button>
 
+            {/* Dropdown */}
             {isOpen && (
-                <div style={styles.dropdown}>
-                    <div style={styles.dropdownHeader}>
-                        <div style={{
-                            ...styles.dropdownAvatar,
-                            backgroundColor: usuarioActivo ? '#4f46e5' : '#9ca3af'
-                        }}>
-                            {usuario.nombre.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <div style={styles.dropdownName}>{usuario.nombre}</div>
-                            <div style={styles.dropdownEmail}>
-                                {usuario.email || 'Sin email'}
+                <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, minWidth: '240px', backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', padding: '6px', zIndex: 1000, animation: 'fadeIn 0.1s ease' }}>
+                    <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}`}</style>
+
+                    {/* User info */}
+                    <div style={{ padding: '10px 12px', marginBottom: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: usuarioActivo ? rc.color : '#94a3b8', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', flexShrink: 0 }}>
+                                {initial}
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '13.5px', fontWeight: '600', color: '#0f172a' }}>{usuario.nombre}</div>
+                                <div style={{ fontSize: '11.5px', color: '#94a3b8' }}>{usuario.email || usuario.rol}</div>
                             </div>
                         </div>
+                        {usuarioActivo && (
+                            <div style={{ marginTop: '8px' }}>
+                                <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', backgroundColor: rc.bg, color: rc.color }}>{usuario.rol}</span>
+                            </div>
+                        )}
                     </div>
 
-                    <div style={styles.divider} />
+                    <div style={{ height: '1px', backgroundColor: '#f1f5f9', margin: '4px 0' }} />
 
+                    {/* Menu items */}
                     {usuarioActivo ? (
                         <>
-                            <button onClick={handleVerPerfil} style={styles.menuItem}>
-                                <User size={16} />
-                                <span>Ver perfil</span>
-                            </button>
-
-                            <div style={styles.divider} />
-
-                            <button onClick={handleCambiarUsuario} style={styles.menuItemDanger}>
-                                <span>Cambiar usuario</span>
-                            </button>
+                            <MenuItem icon={User} label="Ver perfil" onClick={() => close(() => navigate('/perfil'))} />
+                            <div style={{ height: '1px', backgroundColor: '#f1f5f9', margin: '4px 0' }} />
+                            <MenuItem icon={LogOut} label="Cambiar usuario" onClick={() => close(() => { cerrarSesion(); navigate('/seleccion-usuario'); })} danger />
                         </>
                     ) : (
-                        <button onClick={handleIniciarSesion} style={styles.menuItemPrimary}>
-                            <span>Iniciar sesión</span>
-                        </button>
+                        <MenuItem icon={User} label="Iniciar sesión" onClick={() => close(() => navigate('/seleccion-usuario'))} primary />
                     )}
                 </div>
             )}
@@ -117,144 +90,20 @@ export default function ProfileButton() {
     );
 }
 
-const styles = {
-    container: {
-        position: 'relative'
-    },
-    button: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '8px 12px',
-        backgroundColor: 'white',
-        border: '1px solid #e5e7eb',
-        borderRadius: '8px',
-        cursor: 'pointer',
-        transition: 'all 0.2s'
-    },
-    buttonInactive: {
-        opacity: 0.7
-    },
-    avatar: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        color: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '16px',
-        fontWeight: 'bold',
-        flexShrink: 0
-    },
-    info: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        gap: '2px',
-        minWidth: '120px'
-    },
-    name: {
-        fontSize: '14px',
-        fontWeight: '600',
-        color: '#1f2937'
-    },
-    role: {
-        fontSize: '12px',
-        color: '#6b7280'
-    },
-    dropdown: {
-        position: 'absolute',
-        top: 'calc(100% + 8px)',
-        right: 0,
-        minWidth: '280px',
-        backgroundColor: 'white',
-        border: '1px solid #e5e7eb',
-        borderRadius: '12px',
-        boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-        padding: '8px',
-        zIndex: 1000
-    },
-    dropdownHeader: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '12px'
-    },
-    dropdownAvatar: {
-        width: '48px',
-        height: '48px',
-        borderRadius: '50%',
-        color: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '20px',
-        fontWeight: 'bold',
-        flexShrink: 0
-    },
-    dropdownName: {
-        fontSize: '15px',
-        fontWeight: '600',
-        color: '#1f2937',
-        marginBottom: '2px'
-    },
-    dropdownEmail: {
-        fontSize: '13px',
-        color: '#6b7280'
-    },
-    divider: {
-        height: '1px',
-        backgroundColor: '#e5e7eb',
-        margin: '8px 0'
-    },
-    menuItem: {
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '12px',
-        backgroundColor: 'transparent',
-        border: 'none',
-        borderRadius: '6px',
-        color: '#374151',
-        cursor: 'pointer',
-        fontSize: '14px',
-        fontWeight: '500',
-        textAlign: 'left',
-        transition: 'background-color 0.2s'
-    },
-    menuItemPrimary: {
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '12px',
-        padding: '12px',
-        backgroundColor: '#4f46e5',
-        border: 'none',
-        borderRadius: '6px',
-        color: 'white',
-        cursor: 'pointer',
-        fontSize: '14px',
-        fontWeight: '600',
-        textAlign: 'center',
-        transition: 'background-color 0.2s'
-    },
-    menuItemDanger: {
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '12px',
-        backgroundColor: 'transparent',
-        border: 'none',
-        borderRadius: '6px',
-        color: '#dc2626',
-        cursor: 'pointer',
-        fontSize: '14px',
-        fontWeight: '500',
-        textAlign: 'left',
-        transition: 'background-color 0.2s'
-    }
-};
+function MenuItem({ icon: Icon, label, onClick, danger, primary }) {
+    const [hovered, setHovered] = useState(false);
+    const color = danger ? '#dc2626' : primary ? '#1d4ed8' : '#334155';
+    const bg = hovered ? (danger ? '#fef2f2' : primary ? '#eff6ff' : '#f8fafc') : 'transparent';
+
+    return (
+        <button
+            onClick={onClick}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', backgroundColor: bg, border: 'none', borderRadius: '6px', color, cursor: 'pointer', fontSize: '13px', fontWeight: '500', textAlign: 'left', transition: 'background-color 0.12s' }}
+        >
+            <Icon size={15} />
+            <span>{label}</span>
+        </button>
+    );
+}
