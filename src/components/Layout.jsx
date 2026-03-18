@@ -3,12 +3,12 @@ import Sidebar from './Sidebar';
 
 export default function Layout() {
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', backgroundColor: '#f8fafc' }}>
       <Sidebar />
       <main style={{
         flex: 1,
         overflow: 'auto',
-        backgroundColor: '#f9fafb',
+        backgroundColor: '#f8fafc',
         display: 'flex',
         flexDirection: 'column'
       }}>

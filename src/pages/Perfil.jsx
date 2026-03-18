@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { UsuarioService } from '../services/UsuarioService';
-import { User, Mail, Phone, Shield, Save, X, Edit2 } from 'lucide-react';
+import { ArrowLeft, Edit2, Save, X, User, Mail, Phone, Shield, CheckCircle } from 'lucide-react';
 
-/**
- * Página de perfil del usuario
- * Permite ver y editar la información del usuario activo
- */
+const rolConfig = {
+    'ADMIN':         { color: '#1d4ed8', bg: '#eff6ff', label: 'Administrador' },
+    'REPRESENTANTE': { color: '#7c3aed', bg: '#f5f3ff', label: 'Representante' },
+    'CLIENTE':       { color: '#059669', bg: '#f0fdf4', label: 'Cliente' },
+    'default':       { color: '#475569', bg: '#f8fafc', label: 'Usuario' },
+};
+const getRol = (rol) => rolConfig[rol] || rolConfig.default;
+
 export default function Perfil() {
     const { usuarioActivo, actualizarUsuario } = useUser();
     const navigate = useNavigate();
@@ -24,38 +28,29 @@ export default function Perfil() {
 
     if (!usuarioActivo) {
         return (
-            <div style={styles.errorContainer}>
-                <h2>No hay usuario activo</h2>
-                <button onClick={() => navigate('/seleccion-usuario')} style={styles.button}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100%', gap: '16px', fontFamily: "'Inter', system-ui, sans-serif" }}>
+                <p style={{ color: '#64748b', fontSize: '14px' }}>No hay usuario activo.</p>
+                <button onClick={() => navigate('/seleccion-usuario')} style={s.btnPrimary}>
                     Seleccionar usuario
                 </button>
             </div>
         );
     }
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+    const rc = getRol(usuarioActivo.rol);
+
+    const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsSaving(true);
-        setError(null);
-        setSuccess(false);
-
+        setIsSaving(true); setError(null); setSuccess(false);
         try {
-            const usuarioActualizado = await UsuarioService.update(usuarioActivo.id, formData);
-            actualizarUsuario(usuarioActualizado);
+            const updated = await UsuarioService.update(usuarioActivo.id, formData);
+            actualizarUsuario(updated);
             setSuccess(true);
             setIsEditing(false);
-
             setTimeout(() => setSuccess(false), 3000);
         } catch (err) {
-            console.error('Error al actualizar perfil:', err);
             setError(err.message || 'Error al actualizar el perfil');
         } finally {
             setIsSaving(false);
@@ -63,333 +58,155 @@ export default function Perfil() {
     };
 
     const handleCancel = () => {
-        setFormData({
-            nombre: usuarioActivo.nombre,
-            email: usuarioActivo.email || '',
-            telefono: usuarioActivo.telefono || ''
-        });
+        setFormData({ nombre: usuarioActivo.nombre, email: usuarioActivo.email || '', telefono: usuarioActivo.telefono || '' });
         setIsEditing(false);
         setError(null);
     };
 
-    const getRolColor = (rol) => {
-        const colores = {
-            'ADMIN': '#dc2626',
-            'REPRESENTANTE': '#2563eb',
-            'CLIENTE': '#16a34a',
-            'default': '#6b7280'
-        };
-        return colores[rol] || colores.default;
-    };
-
     return (
-        <div style={styles.container}>
-            <div style={styles.card}>
-                <div style={styles.header}>
-                    <div style={{
-                        ...styles.avatar,
-                        backgroundColor: getRolColor(usuarioActivo.rol)
-                    }}>
-                        {usuarioActivo.nombre.charAt(0).toUpperCase()}
-                    </div>
+        <div style={s.page}>
+            {/* Header */}
+            <header style={s.header}>
+                <div style={s.headerLeft}>
+                    <button onClick={() => navigate(-1)} style={s.backBtn} title="Volver">
+                        <ArrowLeft size={18} />
+                    </button>
                     <div>
-                        <h1 style={styles.title}>{usuarioActivo.nombre}</h1>
-                        <span style={{
-                            ...styles.rol,
-                            color: getRolColor(usuarioActivo.rol)
-                        }}>
-                            {usuarioActivo.rol}
-                        </span>
+                        <h1 style={s.headerTitle}>Mi perfil</h1>
+                        <p style={s.headerSub}>Gestiona tu información personal</p>
                     </div>
                 </div>
-
-                {success && (
-                    <div style={styles.successMessage}>
-                        ✓ Perfil actualizado correctamente
+                {!isEditing ? (
+                    <button onClick={() => setIsEditing(true)} style={s.btnOutline}>
+                        <Edit2 size={15} /> Editar
+                    </button>
+                ) : (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={handleCancel} disabled={isSaving} style={s.btnCancel}>
+                            <X size={15} /> Cancelar
+                        </button>
+                        <button onClick={handleSubmit} disabled={isSaving} style={s.btnPrimary}>
+                            <Save size={15} /> {isSaving ? 'Guardando...' : 'Guardar'}
+                        </button>
                     </div>
                 )}
+            </header>
 
+            {/* Content */}
+            <div style={s.content}>
+                {success && (
+                    <div style={s.successAlert}>
+                        <CheckCircle size={16} /> Perfil actualizado correctamente
+                    </div>
+                )}
                 {error && (
-                    <div style={styles.errorMessage}>
+                    <div style={s.errorAlert}>
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} style={styles.form}>
-                    <div style={styles.field}>
-                        <label style={styles.label}>
-                            <User size={18} />
-                            Nombre
-                        </label>
-                        <input
-                            type="text"
-                            name="nombre"
-                            value={formData.nombre}
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                            style={{
-                                ...styles.input,
-                                ...(isEditing ? {} : styles.inputDisabled)
-                            }}
-                            required
-                        />
+                <div style={s.card}>
+                    {/* Avatar section */}
+                    <div style={s.avatarSection}>
+                        <div style={{ ...s.avatar, backgroundColor: rc.color }}>
+                            {usuarioActivo.nombre.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h2 style={s.userName}>{usuarioActivo.nombre}</h2>
+                            <span style={{ ...s.rolBadge, backgroundColor: rc.bg, color: rc.color }}>{rc.label}</span>
+                        </div>
                     </div>
 
-                    <div style={styles.field}>
-                        <label style={styles.label}>
-                            <Mail size={18} />
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                            style={{
-                                ...styles.input,
-                                ...(isEditing ? {} : styles.inputDisabled)
-                            }}
-                            placeholder="correo@ejemplo.com"
-                        />
-                    </div>
+                    <div style={s.divider} />
 
-                    <div style={styles.field}>
-                        <label style={styles.label}>
-                            <Phone size={18} />
-                            Teléfono
-                        </label>
-                        <input
-                            type="tel"
-                            name="telefono"
-                            value={formData.telefono}
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                            style={{
-                                ...styles.input,
-                                ...(isEditing ? {} : styles.inputDisabled)
-                            }}
-                            placeholder="+34 600 000 000"
-                        />
-                    </div>
+                    {/* Form */}
+                    <form onSubmit={handleSubmit} style={s.form}>
+                        <div style={s.grid}>
+                            {[
+                                { name: 'nombre', label: 'Nombre completo', icon: User, type: 'text', required: true },
+                                { name: 'email', label: 'Correo electrónico', icon: Mail, type: 'email', placeholder: 'correo@ejemplo.com' },
+                                { name: 'telefono', label: 'Teléfono', icon: Phone, type: 'tel', placeholder: '+34 600 000 000' },
+                            ].map(({ name, label, icon: Icon, type, placeholder, required }) => (
+                                <div key={name} style={s.field}>
+                                    <label style={s.label}>
+                                        <Icon size={14} color="#94a3b8" />
+                                        {label}
+                                    </label>
+                                    <input
+                                        type={type}
+                                        name={name}
+                                        value={formData[name]}
+                                        onChange={handleChange}
+                                        disabled={!isEditing}
+                                        placeholder={placeholder || ''}
+                                        required={required}
+                                        style={{ ...s.input, ...(isEditing ? s.inputActive : s.inputDisabled) }}
+                                        onFocus={e => { if (isEditing) e.target.style.borderColor = '#1d4ed8'; }}
+                                        onBlur={e => { e.target.style.borderColor = isEditing ? '#e2e8f0' : '#f1f5f9'; }}
+                                    />
+                                </div>
+                            ))}
 
-                    <div style={styles.field}>
-                        <label style={styles.label}>
-                            <Shield size={18} />
-                            Rol (solo lectura)
-                        </label>
-                        <input
-                            type="text"
-                            value={usuarioActivo.rol}
-                            disabled
-                            style={{ ...styles.input, ...styles.inputDisabled }}
-                        />
-                    </div>
+                            {/* Rol - readonly always */}
+                            <div style={s.field}>
+                                <label style={s.label}>
+                                    <Shield size={14} color="#94a3b8" />
+                                    Rol del sistema
+                                </label>
+                                <input type="text" value={usuarioActivo.rol} disabled style={{ ...s.input, ...s.inputDisabled }} />
+                            </div>
+                        </div>
+                    </form>
+                </div>
 
-                    <div style={styles.actions}>
-                        {!isEditing ? (
-                            <button
-                                type="button"
-                                onClick={() => setIsEditing(true)}
-                                style={styles.editButton}
-                            >
-                                <Edit2 size={18} />
-                                Editar perfil
-                            </button>
-                        ) : (
-                            <>
-                                <button
-                                    type="button"
-                                    onClick={handleCancel}
-                                    style={styles.cancelButton}
-                                    disabled={isSaving}
-                                >
-                                    <X size={18} />
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    style={styles.saveButton}
-                                    disabled={isSaving}
-                                >
-                                    <Save size={18} />
-                                    {isSaving ? 'Guardando...' : 'Guardar cambios'}
-                                </button>
-                            </>
-                        )}
-                    </div>
-                </form>
+                {/* Info card */}
+                <div style={s.infoCard}>
+                    <p style={s.infoText}>
+                        <strong style={{ color: '#475569' }}>ID de usuario:</strong> #{usuarioActivo.id}
+                    </p>
+                    <p style={s.infoText}>El rol del sistema no puede modificarse desde este panel.</p>
+                </div>
             </div>
         </div>
     );
 }
 
-const styles = {
-    container: {
-        minHeight: '100vh',
-        padding: '40px 20px',
-        backgroundColor: '#f9fafb',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'flex-start'
-    },
-    card: {
-        backgroundColor: 'white',
-        borderRadius: '16px',
-        padding: '40px',
-        maxWidth: '600px',
-        width: '100%',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-    },
-    header: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '24px',
-        marginBottom: '32px',
-        paddingBottom: '24px',
-        borderBottom: '2px solid #e5e7eb'
-    },
-    avatar: {
-        width: '80px',
-        height: '80px',
-        borderRadius: '50%',
-        color: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '32px',
-        fontWeight: 'bold',
-        flexShrink: 0
-    },
-    title: {
-        fontSize: '28px',
-        fontWeight: 'bold',
-        color: '#1f2937',
-        margin: '0 0 4px 0'
-    },
-    rol: {
-        fontSize: '14px',
-        fontWeight: '600',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px'
-    },
-    form: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px'
-    },
-    field: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px'
-    },
-    label: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontSize: '14px',
-        fontWeight: '600',
-        color: '#374151'
-    },
-    input: {
-        padding: '12px 16px',
-        fontSize: '16px',
-        border: '2px solid #e5e7eb',
-        borderRadius: '8px',
-        transition: 'border-color 0.2s'
-    },
-    inputDisabled: {
-        backgroundColor: '#f3f4f6',
-        color: '#6b7280',
-        cursor: 'not-allowed'
-    },
-    actions: {
-        display: 'flex',
-        gap: '12px',
-        marginTop: '16px'
-    },
-    editButton: {
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        padding: '12px 24px',
-        backgroundColor: '#4f46e5',
-        color: 'white',
-        border: 'none',
-        borderRadius: '8px',
-        fontSize: '16px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        transition: 'background-color 0.2s'
-    },
-    saveButton: {
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        padding: '12px 24px',
-        backgroundColor: '#16a34a',
-        color: 'white',
-        border: 'none',
-        borderRadius: '8px',
-        fontSize: '16px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        transition: 'background-color 0.2s'
-    },
-    cancelButton: {
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        padding: '12px 24px',
-        backgroundColor: '#e5e7eb',
-        color: '#374151',
-        border: 'none',
-        borderRadius: '8px',
-        fontSize: '16px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        transition: 'background-color 0.2s'
-    },
-    successMessage: {
-        padding: '12px 16px',
-        backgroundColor: '#d1fae5',
-        color: '#065f46',
-        borderRadius: '8px',
-        marginBottom: '16px',
-        fontSize: '14px',
-        fontWeight: '500'
-    },
-    errorMessage: {
-        padding: '12px 16px',
-        backgroundColor: '#fee2e2',
-        color: '#991b1b',
-        borderRadius: '8px',
-        marginBottom: '16px',
-        fontSize: '14px',
-        fontWeight: '500'
-    },
-    errorContainer: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        gap: '16px'
-    },
-    button: {
-        padding: '12px 24px',
-        backgroundColor: '#4f46e5',
-        color: 'white',
-        border: 'none',
-        borderRadius: '8px',
-        fontSize: '16px',
-        fontWeight: '600',
-        cursor: 'pointer'
-    }
+const s = {
+    page: { display: 'flex', flexDirection: 'column', height: '100%', fontFamily: "'Inter', system-ui, sans-serif", fontSize: '14px' },
+    header: { backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px', flexShrink: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.04)' },
+    headerLeft: { display: 'flex', alignItems: 'center', gap: '14px' },
+    headerTitle: { fontSize: '17px', fontWeight: '700', color: '#0f172a', margin: 0 },
+    headerSub: { fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' },
+    backBtn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '34px', border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: 'white', cursor: 'pointer', color: '#475569', flexShrink: 0, transition: 'all 0.15s' },
+    content: { flex: 1, overflow: 'auto', padding: '24px', backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' },
+
+    // Alerts
+    successAlert: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderLeft: '4px solid #16a34a', borderRadius: '6px', color: '#15803d', fontSize: '13.5px', fontWeight: '500', width: '100%', maxWidth: '640px', boxSizing: 'border-box' },
+    errorAlert: { padding: '10px 14px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderLeft: '4px solid #dc2626', borderRadius: '6px', color: '#dc2626', fontSize: '13.5px', width: '100%', maxWidth: '640px', boxSizing: 'border-box' },
+
+    // Card
+    card: { backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '28px', width: '100%', maxWidth: '640px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
+    avatarSection: { display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' },
+    avatar: { width: '56px', height: '56px', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: '700', flexShrink: 0 },
+    userName: { fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: '0 0 6px' },
+    rolBadge: { padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' },
+    divider: { height: '1px', backgroundColor: '#f1f5f9', margin: '0 0 24px' },
+
+    // Form
+    form: {},
+    grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' },
+    field: { display: 'flex', flexDirection: 'column', gap: '6px' },
+    label: { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#475569', letterSpacing: '0.1px' },
+    input: { padding: '8px 12px', fontSize: '13.5px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', transition: 'border-color 0.15s', boxSizing: 'border-box' },
+    inputActive: { backgroundColor: 'white', color: '#0f172a', cursor: 'text' },
+    inputDisabled: { backgroundColor: '#f8fafc', color: '#64748b', cursor: 'default' },
+
+    // Info card
+    infoCard: { backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px 20px', width: '100%', maxWidth: '640px', boxSizing: 'border-box' },
+    infoText: { fontSize: '12.5px', color: '#94a3b8', margin: '0 0 4px', lineHeight: 1.6 },
+
+    // Buttons
+    btnPrimary: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '4px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
+    btnOutline: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', backgroundColor: 'transparent', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
+    btnCancel: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', backgroundColor: 'transparent', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
 };
