@@ -1,23 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, X, Home, Bell, User, Menu, Layers, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, AlertCircle, Eye } from 'lucide-react';
 import { ArticulosService, mapArticuloFromBackend } from '../services/ArticulosService';
+import ProfileButton from '../components/ProfileButton';
 
 const Articulos = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('list'); // 'list', 'create', 'edit'
+  const [viewMode, setViewMode] = useState('list');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  
-  const [formData, setFormData] = useState({
+
+  //Corrección de datos BD
+  const initialFormState = {
     id: '',
     nombre: '',
-    cantidad: 0,
-    dto: 0,
-    precio: 0
-  });
+    situacion: 'ACTIVO',
+    pvpMinimo: 0,
+    pesoKg: 0,
+    altoCm: 0,
+    anchoCm: 0,
+    largoCm: 0,
+    vendible: true
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
     cargarProductos();
@@ -28,11 +35,10 @@ const Articulos = () => {
     setError(null);
     try {
       const data = await ArticulosService.getAll();
-      const productosMapeados = data.map(mapArticuloFromBackend);
-      setProductos(productosMapeados);
+      // Mapeamos los datos para asegurar que el front entiende la estructura del back
+      setProductos(data.map(mapArticuloFromBackend));
     } catch (err) {
       setError('Error al cargar los productos: ' + err.message);
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -40,13 +46,7 @@ const Articulos = () => {
 
   const handleNew = () => {
     setSelectedProduct(null);
-    setFormData({
-      id: '',
-      nombre: '',
-      cantidad: 0,
-      dto: 0,
-      precio: 0
-    });
+    setFormData(initialFormState);
     setViewMode('create');
   };
 
@@ -57,35 +57,27 @@ const Articulos = () => {
   };
 
   const handleDelete = async (producto) => {
-    const confirmDelete = window.confirm(
-      `¿Estás seguro de que deseas eliminar el producto "${producto.nombre}"?\n\nEsta acción no se puede deshacer.`
-    );
-    
-    if (confirmDelete) {
-      setLoading(true);
-      setError(null);
-      try {
-        await ArticulosService.delete(producto.id);
-        alert(`Producto "${producto.nombre}" eliminado correctamente`);
-        await cargarProductos();
-      } catch (err) {
-        setError('Error al eliminar el producto: ' + err.message);
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar el producto "${producto.nombre}"?`)) return;
+    setLoading(true);
+    try {
+      await ArticulosService.delete(producto.id);
+      alert(`Producto eliminado correctamente`);
+      await cargarProductos();
+    } catch (err) {
+      setError('Error al eliminar el producto: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSave = async () => {
-    if (!formData.nombre || !formData.precio || parseFloat(formData.precio) <= 0) {
-      alert('Por favor completa los campos obligatorios (Nombre y Precio válido)');
+    // Validaciones basadas en la lógica de tu Articulo.java
+    if (!formData.nombre || formData.pvpMinimo < 0) {
+      alert('Por favor completa los campos obligatorios (Nombre y PVP no negativo)');
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       if (viewMode === 'edit') {
         await ArticulosService.update(selectedProduct.id, formData);
@@ -94,13 +86,11 @@ const Articulos = () => {
         await ArticulosService.create(formData);
         alert('Producto creado correctamente');
       }
-      
       await cargarProductos();
       setViewMode('list');
       setSelectedProduct(null);
     } catch (err) {
       setError('Error al guardar el producto: ' + err.message);
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -116,209 +106,106 @@ const Articulos = () => {
     setFormData({ ...formData, [field]: value });
   };
 
+  const handleViewArticulo = async (producto) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await ArticulosService.getById(producto.id);
+      setSelectedProduct(mapArticuloFromBackend(data));
+      setViewMode('view');
+    } catch (err) {
+      setError('Error al obtener el artículo: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredProductos = productos.filter(p =>
     p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.id.toString().includes(searchTerm)
   );
 
   const getTitle = () => {
-    switch(viewMode) {
-      case 'edit': return 'Editar Producto';
-      case 'create': return 'Nuevo Producto';
+    switch (viewMode) {
+      case 'view': return 'Detalles del Artículo';
+      case 'edit': return 'Editar Artículo';
+      case 'create': return 'Nuevo Artículo';
       default: return 'Artículos';
     }
   };
 
+  // Componentes Auxiliares de UI
   const ErrorAlert = ({ message }) => (
-    <div style={{
-      backgroundColor: '#fee2e2',
-      border: '1px solid #fecaca',
-      borderRadius: '8px',
-      padding: '12px 16px',
-      marginBottom: '16px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      color: '#dc2626'
-    }}>
-      <AlertCircle size={20} />
-      <span>{message}</span>
+    <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderLeft: '4px solid #dc2626', borderRadius: '6px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px', color: '#dc2626', fontSize: '13.5px' }}>
+      <AlertCircle size={20} /><span>{message}</span>
     </div>
   );
 
   const LoadingSpinner = () => (
     <div style={{ textAlign: 'center', padding: '40px' }}>
-      <div style={{
-        width: '40px',
-        height: '40px',
-        border: '4px solid #e5e7eb',
-        borderTop: '4px solid #4f46e5',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-        margin: '0 auto'
-      }} />
+      <div style={{ width: '40px', height: '40px', border: '3px solid #e2e8f0', borderTop: '3px solid #1d4ed8', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto' }} />
       <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       <p style={{ marginTop: '16px', color: '#6b7280' }}>Cargando...</p>
     </div>
   );
 
   const renderForm = () => (
-    <div style={{
-      backgroundColor: 'white',
-      borderRadius: '8px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-      padding: '24px',
-      maxWidth: '600px',
-      margin: '0 auto'
-    }}>
+    <div style={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', padding: '28px', maxWidth: '896px' }}>
       {error && <ErrorAlert message={error} />}
-      
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
-        {selectedProduct && (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        {viewMode === 'edit' && (
           <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-              ID
-            </label>
-            <input
-              type="text"
-              value={formData.id}
-              disabled
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                backgroundColor: '#f3f4f6',
-                boxSizing: 'border-box'
-              }}
-            />
+            <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>ID Artículo</label>
+            <input type="text" value={formData.id} disabled style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: '#f3f4f6', color: '#6b7280' }} />
           </div>
         )}
+        <div style={{ gridColumn: viewMode === 'edit' ? 'auto' : '1 / -1' }}>
+          <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Nombre del Producto *</label>
+          <input type="text" value={formData.nombre} onChange={(e) => handleInputChange('nombre', e.target.value)} disabled={loading} style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: loading ? '#f3f4f6' : 'white' }} />
+        </div>
         
         <div>
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-            Nombre del Producto *
-          </label>
-          <input
-            type="text"
-            value={formData.nombre}
-            onChange={(e) => handleInputChange('nombre', e.target.value)}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              outline: 'none',
-              boxSizing: 'border-box',
-              backgroundColor: loading ? '#f3f4f6' : 'white'
-            }}
-            placeholder="Ej: Tornillo M6"
-          />
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-              Cantidad
-            </label>
-            <input
-              type="number"
-              value={formData.cantidad}
-              onChange={(e) => handleInputChange('cantidad', e.target.value)}
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                outline: 'none',
-                boxSizing: 'border-box',
-                backgroundColor: loading ? '#f3f4f6' : 'white'
-              }}
-              placeholder="0"
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-              Descuento (%)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              value={formData.dto}
-              onChange={(e) => handleInputChange('dto', e.target.value)}
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                outline: 'none',
-                boxSizing: 'border-box',
-                backgroundColor: loading ? '#f3f4f6' : 'white'
-              }}
-              placeholder="0.00"
-            />
-          </div>
+          <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Situación</label>
+          <select value={formData.situacion} onChange={(e) => handleInputChange('situacion', e.target.value)} style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+            <option value="ACTIVO">ACTIVO</option>
+            <option value="INACTIVO">INACTIVO</option>
+          </select>
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-            Precio (€) *
-          </label>
-          <input
-            type="number"
-            step="0.01"
-            value={formData.precio}
-            onChange={(e) => handleInputChange('precio', e.target.value)}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              outline: 'none',
-              boxSizing: 'border-box',
-              backgroundColor: loading ? '#f3f4f6' : 'white'
-            }}
-            placeholder="0.00"
-          />
+          <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>PVP Mínimo (€) *</label>
+          <input type="number" step="0.01" value={formData.pvpMinimo} onChange={(e) => handleInputChange('pvpMinimo', parseFloat(e.target.value))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '6px' }} />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Peso (Kg)</label>
+          <input type="number" step="0.01" value={formData.pesoKg} onChange={(e) => handleInputChange('pesoKg', parseFloat(e.target.value))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '6px' }} />
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <input type="checkbox" checked={formData.vendible} onChange={(e) => handleInputChange('vendible', e.target.checked)} id="vendible" />
+          <label htmlFor="vendible" style={{ fontSize: '12.5px', fontWeight: '600', color: '#475569' }}>¿Es vendible?</label>
+        </div>
+
+        <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '16px' }}>
+           <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', fontSize: '11px', color: '#64748b' }}>Alto (cm)</label>
+              <input type="number" value={formData.altoCm} onChange={(e) => handleInputChange('altoCm', parseFloat(e.target.value))} style={{ width: '100%', padding: '8px', border: '1px solid #e2e8f0', borderRadius: '6px' }} />
+           </div>
+           <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', fontSize: '11px', color: '#64748b' }}>Ancho (cm)</label>
+              <input type="number" value={formData.anchoCm} onChange={(e) => handleInputChange('anchoCm', parseFloat(e.target.value))} style={{ width: '100%', padding: '8px', border: '1px solid #e2e8f0', borderRadius: '6px' }} />
+           </div>
+           <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', fontSize: '11px', color: '#64748b' }}>Largo (cm)</label>
+              <input type="number" value={formData.largoCm} onChange={(e) => handleInputChange('largoCm', parseFloat(e.target.value))} style={{ width: '100%', padding: '8px', border: '1px solid #e2e8f0', borderRadius: '6px' }} />
+           </div>
         </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
-        <button
-          onClick={handleCancel}
-          disabled={loading}
-          style={{
-            padding: '8px 24px',
-            border: '1px solid #d1d5db',
-            borderRadius: '8px',
-            color: '#374151',
-            backgroundColor: 'white',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontWeight: '500',
-            opacity: loading ? 0.6 : 1
-          }}
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={loading}
-          style={{
-            padding: '8px 24px',
-            backgroundColor: '#4f46e5',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontWeight: '500',
-            opacity: loading ? 0.6 : 1
-          }}
-        >
+        <button onClick={handleCancel} style={{ padding: '8px 24px', border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: 'white', cursor: 'pointer' }}>Cancelar</button>
+        <button onClick={handleSave} style={{ padding: '8px 24px', backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '500' }}>
           {loading ? 'Guardando...' : 'Guardar Cambios'}
         </button>
       </div>
@@ -326,112 +213,88 @@ const Articulos = () => {
   );
 
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f9fafb', fontFamily: 'system-ui' }}>
-      {/* Sidebar */}
-      <div style={{ width: sidebarOpen ? '256px' : '80px', backgroundColor: '#312e81', color: 'white', transition: 'width 0.3s', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #4338ca' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '32px', height: '32px', backgroundColor: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#312e81', fontWeight: 'bold', fontSize: '14px' }}>A</span>
-            </div>
-            {sidebarOpen && <span style={{ fontWeight: '600' }}>Admin Portal</span>}
-          </div>
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ padding: '4px', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '4px' }}>
-            <Menu size={20} />
-          </button>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', fontFamily: "'Inter', sans-serif" }}>
+      <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e5e7eb', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {viewMode !== 'list' && (
+            <button onClick={handleCancel} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}><X size={20} /></button>
+          )}
+          <h1 style={{ fontSize: '17px', fontWeight: '700', margin: 0 }}>{getTitle()}</h1>
         </div>
-        <nav style={{ flex: 1, padding: '16px' }}>
-          <a href="#home" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', marginBottom: '8px', textDecoration: 'none', color: 'white' }}>
-            <Home size={20} />
-            {sidebarOpen && <span>Home</span>}
-          </a>
-          <a href="#articulos" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px', backgroundColor: '#4338ca', textDecoration: 'none', color: 'white' }}>
-            <Layers size={20} />
-            {sidebarOpen && <span>Artículos</span>}
-          </a>
-        </nav>
-      </div>
+        <ProfileButton />
+      </header>
 
-      {/* Main */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e5e7eb', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {viewMode !== 'list' && (
-              <button onClick={handleCancel} style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                <X size={20} />
-              </button>
-            )}
-            <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{getTitle()}</h1>
-          </div>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', position: 'relative' }}>
-              <Bell size={20} />
-              <span style={{ position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px', backgroundColor: '#ef4444', borderRadius: '50%' }}></span>
-            </button>
-            <button style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer' }}><User size={20} /></button>
-          </div>
-        </header>
+      <div style={{ flex: 1, overflow: 'auto', padding: '24px', backgroundColor: '#f8fafc' }}>
+        {error && viewMode === 'list' && <ErrorAlert message={error} />}
 
-        <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
-          {error && viewMode === 'list' && <ErrorAlert message={error} />}
-          
-          {loading && viewMode === 'list' ? (
-            <LoadingSpinner />
-          ) : viewMode === 'list' ? (
-            <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-              <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-                <div style={{ position: 'relative', flexGrow: 1, minWidth: '250px' }}>
-                  <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                  <input type="text" placeholder="Buscar productos..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ paddingLeft: '40px', padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
-                </div>
-                <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#4f46e5', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap' }}>
-                  <Plus size={20} />Nuevo Producto
-                </button>
+        {loading && viewMode === 'list' ? (
+          <LoadingSpinner />
+        ) : viewMode === 'list' ? (
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+              <div style={{ position: 'relative', flexGrow: 1 }}>
+                <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                <input type="text" placeholder="Buscar artículos..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ paddingLeft: '40px', paddingRight: '16px', height: '38px', border: '1px solid #e2e8f0', borderRadius: '6px', width: '100%' }} />
               </div>
+              <button onClick={handleNew} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#1d4ed8', color: 'white', padding: '0 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500' }}>
+                <Plus size={20} />Nuevo Artículo
+              </button>
+            </div>
 
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                    <tr>
-                      {['ID', 'Nombre', 'Cantidad', 'DTO (%)', 'Precio (€)', 'Acciones'].map(h => (
-                        <th key={h} style={{ padding: '12px 24px', textAlign: h === 'Nombre' ? 'left' : h === 'Acciones' ? 'center' : 'right', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProductos.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>
-                          {searchTerm ? 'No se encontraron productos' : 'Aún no hay productos. ¡Crea uno nuevo!'}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                  <tr>
+                    {['ID', 'Nombre', 'Situación', 'PVP Mínimo', 'Acciones'].map(h => (
+                      <th key={h} style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', color: '#64748b', textTransform: 'uppercase' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProductos.length === 0 ? (
+                    <tr><td colSpan="5" style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>No se encontraron artículos</td></tr>
+                  ) : (
+                    filteredProductos.map((p) => (
+                      <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '13px 20px' }}>{p.id}</td>
+                        <td style={{ padding: '13px 20px', fontWeight: '500' }}>{p.nombre}</td>
+                        <td style={{ padding: '13px 20px' }}>
+                          <span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '12px', backgroundColor: p.situacion === 'ACTIVO' ? '#dcfce7' : '#fee2e2', color: p.situacion === 'ACTIVO' ? '#166534' : '#991b1b' }}>
+                            {p.situacion}
+                          </span>
+                        </td>
+                        <td style={{ padding: '13px 20px' }}>{p.pvpMinimo?.toFixed(2)}€</td>
+                        <td style={{ padding: '13px 20px' }}>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => handleViewArticulo(p)} style={{ color: '#16a34a', background: 'none', border: 'none', cursor: 'pointer' }}><Eye size={16} /></button>
+                            <button onClick={() => handleEdit(p)} style={{ color: '#1d4ed8', background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={16} /></button>
+                            <button onClick={() => handleDelete(p)} style={{ color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                          </div>
                         </td>
                       </tr>
-                    ) : (
-                      filteredProductos.map((producto) => (
-                        <tr key={producto.id}
-                          style={{ borderBottom: '1px solid #e5e7eb', transition: 'background-color 0.2s' }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                          <td style={{ padding: '16px 24px', fontSize: '14px', fontFamily: 'monospace', color: '#6b7280' }}>{producto.id}</td>
-                          <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: '500' }}>{producto.nombre}</td>
-                          <td style={{ padding: '16px 24px', fontSize: '14px', textAlign: 'right', color: '#4b5563' }}>{producto.cantidad}</td>
-                          <td style={{ padding: '16px 24px', fontSize: '14px', textAlign: 'right', color: '#059669', fontWeight: '600' }}>{producto.dto}%</td>
-                          <td style={{ padding: '16px 24px', fontSize: '14px', textAlign: 'right', fontWeight: '700', color: '#374151' }}>{producto.precio.toFixed(2)}€</td>
-                          <td style={{ padding: '16px 24px', textAlign: 'center' }}>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                              <button onClick={() => handleEdit(producto)} style={{ padding: '8px', color: '#4f46e5', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Editar"><Edit2 size={16} /></button>
-                              <button onClick={() => handleDelete(producto)} style={{ padding: '8px', color: '#dc2626', background: 'transparent', border: 'none', cursor: 'pointer' }} title="Eliminar"><Trash2 size={16} /></button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
-          ) : renderForm()}
-        </div>
+          </div>
+        ) : viewMode === 'view' ? (
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '32px', maxWidth: '896px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '20px' }}>{selectedProduct?.nombre}</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+              <div><strong>ID:</strong> {selectedProduct?.id}</div>
+              <div><strong>Situación:</strong> {selectedProduct?.situacion}</div>
+              <div><strong>PVP Mínimo:</strong> {selectedProduct?.pvpMinimo?.toFixed(2)}€</div>
+              <div><strong>Peso:</strong> {selectedProduct?.pesoKg} Kg</div>
+              <div><strong>Dimensiones:</strong> {`${selectedProduct?.altoCm}x${selectedProduct?.anchoCm}x${selectedProduct?.largoCm} cm`}</div>
+              <div><strong>Vendible:</strong> {selectedProduct?.vendible ? 'Sí' : 'No'}</div>
+            </div>
+            <div style={{ marginTop: '32px', display: 'flex', gap: '12px' }}>
+               <button onClick={handleCancel} style={{ padding: '8px 24px', border: '1px solid #e2e8f0', borderRadius: '6px', cursor: 'pointer' }}>Volver</button>
+               <button onClick={() => handleEdit(selectedProduct)} style={{ padding: '8px 24px', backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Editar</button>
+            </div>
+          </div>
+        ) : renderForm()}
       </div>
     </div>
   );

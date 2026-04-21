@@ -1,362 +1,336 @@
 import React, { useState, useEffect } from "react";
-import { Eye, Edit2, Trash2, Search, Menu, Bell, User, X, AlertCircle, Plus } from 'lucide-react';
-import './representantes.css';
-import RepresentanteService, { mapRepresentanteFromBackend } from '../services/RepresentanteService';
+import { Eye, Edit2, Trash2, Search, Plus, X, AlertCircle } from 'lucide-react';
+import ProfileButton from '../components/ProfileButton';
 
-export default function ListaRepresentantes() {
-  const [search, setSearch] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+const API_BASE_URL = '/api/v1/representantes';
+
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Accept': 'application/json'
+});
+
+const handleResponse = async (response) => {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error ${response.status}: ${errorText || response.statusText}`);
+  }
+  if (response.status === 204) return null;
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+};
+
+const RepresentanteService = {
+  listarRepresentantes: async () => {
+    const response = await fetch(API_BASE_URL, { method: 'GET', headers: getHeaders() });
+    return await handleResponse(response);
+  },
+  obtenerRepresentantePorId: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, { method: 'GET', headers: getHeaders() });
+    return await handleResponse(response);
+  },
+  crearRepresentante: async (data) => {
+    const response = await fetch(API_BASE_URL, { method: 'POST', headers: getHeaders(), body: JSON.stringify(data) });
+    return await handleResponse(response);
+  },
+  actualizarRepresentante: async (id, data) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify(data) });
+    return await handleResponse(response);
+  },
+  eliminarRepresentante: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE', headers: getHeaders() });
+    return await handleResponse(response);
+  }
+};
+
+const RepresentantesPage = () => {
+  const [selectedRep, setSelectedRep] = useState(null);
+  const [viewMode, setViewMode] = useState('list');
+  const [searchTerm, setSearchTerm] = useState('');
   const [representantes, setRepresentantes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
 
   const [formData, setFormData] = useState({
-    codigo_interno: '',
-    nombre: '',
-    telefono: '',
-    email: '',
-    zona: '',
-    comision: ''
+    id: '', name: '', phone: '', email: '', zone: '', internalCode: '', commission: ''
   });
 
-  // Cargar representantes al inicio
-  useEffect(() => {
-    cargarRepresentantes();
-  }, []);
+  useEffect(() => { cargarRepresentantes(); }, []);
 
   const cargarRepresentantes = async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await RepresentanteService.listarRepresentantes();
-      const representantesMapeados = data.map(mapRepresentanteFromBackend);
-      setRepresentantes(representantesMapeados);
+      setRepresentantes(data);
     } catch (err) {
-      setError('Error al cargar representantes: ' + err.message);
-      console.error(err);
+      setError('Error al cargar los representantes: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredRepresentantes = representantes.filter(rep =>
-    rep.nombre.toLowerCase().includes(search.toLowerCase()) ||
-    rep.email.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const handleView = async (id) => {
+  const handleViewRep = async (rep) => {
+    setLoading(true);
+    setError(null);
     try {
-      const data = await RepresentanteService.obtenerRepresentantePorId(id);
-      const rep = mapRepresentanteFromBackend(data);
-      alert(`Ver representante:\n\nID: ${rep.id}\nCódigo Interno: ${rep.codigo_interno}\nNombre: ${rep.nombre}\nEmail: ${rep.email}\nZona: ${rep.zona}\nTeléfono: ${rep.telefono}\nComisión: ${rep.comision}`);
+      const data = await RepresentanteService.obtenerRepresentantePorId(rep.id);
+      setSelectedRep(data);
+      setViewMode('view');
     } catch (err) {
-      alert('Error al obtener representante: ' + err.message);
+      setError('Error al obtener el representante: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleEdit = (id) => {
-    const rep = representantes.find(r => r.id === id);
+  const handleEdit = (rep) => {
+    setSelectedRep(rep);
     setFormData({
-      codigo_interno: rep.codigo_interno,
-      nombre: rep.nombre,
-      telefono: rep.telefono || '',
-      email: rep.email,
-      zona: rep.zona,
-      comision: rep.comision
+      id: rep.id, name: rep.name || '', phone: rep.phone || '',
+      email: rep.email || '', zone: rep.zone || '',
+      internalCode: rep.internalCode || '', commission: rep.commission || ''
     });
-    setEditingId(rep.id);
-    setShowForm(true);
+    setViewMode('edit');
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar este representante?')) {
-      try {
-        await RepresentanteService.eliminarRepresentante(id);
-        alert('Representante eliminado correctamente');
-        await cargarRepresentantes();
-      } catch (err) {
-        alert('Error al eliminar: ' + err.message);
-      }
-    }
-  };
-
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!formData.nombre || !formData.codigo_interno) {
-      alert('Por favor completa los campos obligatorios (Nombre y Código Interno)');
-      return;
-    }
-    
+  const handleDelete = async (rep) => {
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar el representante "${rep.name}"?\n\nEsta acción no se puede deshacer.`)) return;
+    setLoading(true);
+    setError(null);
     try {
-      if (editingId) {
-        await RepresentanteService.actualizarRepresentante(editingId, formData);
-        alert('Representante actualizado correctamente');
-      } else {
-        await RepresentanteService.crearRepresentante(formData);
-        alert('Representante creado correctamente');
-      }
-      
+      await RepresentanteService.eliminarRepresentante(rep.id);
+      alert(`Representante "${rep.name}" eliminado correctamente`);
       await cargarRepresentantes();
-      setFormData({ codigo_interno: '', nombre: '', telefono: '', email: '', zona: '', comision: '' });
-      setShowForm(false);
-      setEditingId(null);
     } catch (err) {
-      alert('Error al guardar: ' + err.message);
+      setError('Error al eliminar el representante: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleNew = () => {
-    setFormData({
-      codigo_interno: '',
-      nombre: '',
-      telefono: '',
-      email: '',
-      zona: '',
-      comision: ''
-    });
-    setEditingId(null);
-    setShowForm(true);
+    setSelectedRep(null);
+    setFormData({ id: '', name: '', phone: '', email: '', zone: '', internalCode: '', commission: '' });
+    setViewMode('create');
+  };
+
+  const handleSave = async () => {
+    if (!formData.name || !formData.phone || !formData.zone || !formData.internalCode) {
+      alert('Por favor completa los campos obligatorios (Nombre, Teléfono, Zona y Código Interno)');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const dataToSend = {
+        name: formData.name, phone: formData.phone,
+        email: formData.email || null, zone: formData.zone,
+        internalCode: formData.internalCode,
+        commission: formData.commission ? Number(formData.commission) : null
+      };
+      if (viewMode === 'edit') {
+        await RepresentanteService.actualizarRepresentante(selectedRep.id, dataToSend);
+        alert('Representante actualizado correctamente');
+      } else {
+        await RepresentanteService.crearRepresentante(dataToSend);
+        alert('Representante creado correctamente');
+      }
+      await cargarRepresentantes();
+      setViewMode('list');
+      setSelectedRep(null);
+    } catch (err) {
+      setError('Error al guardar el representante: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => { setViewMode('list'); setSelectedRep(null); setError(null); };
+  const handleInputChange = (field, value) => setFormData({ ...formData, [field]: value });
+
+  const filteredRepresentantes = representantes.filter(rep =>
+    rep.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    rep.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    rep.internalCode?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getTitle = () => {
+    switch (viewMode) {
+      case 'view': return 'Detalles del Representante';
+      case 'edit': return 'Editar Representante';
+      case 'create': return 'Nuevo Representante';
+      default: return 'Representantes';
+    }
   };
 
   const ErrorAlert = ({ message }) => (
-    <div style={{
-      backgroundColor: '#fee2e2',
-      border: '1px solid #fecaca',
-      borderRadius: '8px',
-      padding: '12px 16px',
-      marginBottom: '16px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      color: '#dc2626'
-    }}>
-      <AlertCircle size={20} />
-      <span>{message}</span>
+    <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderLeft: '4px solid #dc2626', borderRadius: '6px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px', color: '#dc2626', fontSize: '13.5px' }}>
+      <AlertCircle size={20} /><span>{message}</span>
     </div>
   );
 
   const LoadingSpinner = () => (
     <div style={{ textAlign: 'center', padding: '40px' }}>
-      <div style={{
-        width: '40px',
-        height: '40px',
-        border: '4px solid #e5e7eb',
-        borderTop: '4px solid #4f46e5',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-        margin: '0 auto'
-      }} />
+      <div style={{ width: '40px', height: '40px', border: '3px solid #e2e8f0', borderTop: '3px solid #1d4ed8', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto' }} />
       <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       <p style={{ marginTop: '16px', color: '#6b7280' }}>Cargando...</p>
     </div>
   );
 
-  if (loading && representantes.length === 0) {
-    return (
-      <div className="layout_Repre">
-        <div className="main">
-          <div className="content">
-            <LoadingSpinner />
+  const renderForm = () => (
+    <div style={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', padding: '28px', maxWidth: '896px' }}>
+      {error && <ErrorAlert message={error} />}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        {[
+          { label: 'Nombre *', field: 'name', placeholder: 'Carlos Mendoza' },
+          { label: 'Código Interno *', field: 'internalCode', placeholder: 'REP001', disabled: viewMode === 'edit' },
+          { label: 'Teléfono *', field: 'phone', type: 'tel', placeholder: '+34 600 123 456' },
+          { label: 'Email', field: 'email', type: 'email', placeholder: 'carlos@belgem.com' },
+          { label: 'Zona *', field: 'zone', placeholder: 'Barcelona' },
+          { label: 'Comisión', field: 'commission', type: 'number', placeholder: '12.50', step: '0.01' }
+        ].map(({ label, field, disabled, type = 'text', placeholder, step }) => (
+          <div key={field}>
+            <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '600', color: '#475569', marginBottom: '6px', letterSpacing: '0.1px' }}>{label}</label>
+            <input type={type} step={step} value={formData[field]}
+              onChange={(e) => handleInputChange(field, e.target.value)}
+              disabled={disabled || loading} placeholder={placeholder}
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', backgroundColor: (disabled || loading) ? '#f3f4f6' : 'white', color: '#000000' }} />
           </div>
-        </div>
+        ))}
       </div>
-    );
-  }
-
-  return (
-    <div className="layout_Repre">
-      <div className="main">
-        <header className="header">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="icon-btn">
-            <Menu size={24} />
-          </button>
-
-          <div className="header-right">
-            <button className="icon-btn notification">
-              <Bell size={20} />
-              <span className="dot"></span>
-            </button>
-            <button className="icon-btn">
-              <User size={20} />
-            </button>
-          </div>
-        </header>
-
-        <main className="content">
-          <div className="content-header">
-            <h1>Listado de Representantes</h1>
-            <button className="btn-green" onClick={handleNew}>
-              <Plus size={20} style={{ marginRight: '8px' }} />
-              Nuevo Representante
-            </button>
-          </div>
-
-          {error && <ErrorAlert message={error} />}
-
-          <div className="search-box">
-            <Search className="search-icon" />
-            <input
-              type="text"
-              placeholder="Buscar por nombre o email"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código Interno</th>
-                  <th>Nombre</th>
-                  <th>Email</th>
-                  <th>Teléfono</th>
-                  <th>Zona</th>
-                  <th>Comisión</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRepresentantes.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: '#6b7280' }}>
-                      No se encontraron representantes
-                    </td>
-                  </tr>
-                ) : (
-                  filteredRepresentantes.map(rep => (
-                    <tr key={rep.id}>
-                      <td>{rep.codigo_interno}</td>
-                      <td>{rep.nombre}</td>
-                      <td>{rep.email}</td>
-                      <td>{rep.telefono}</td>
-                      <td>{rep.zona}</td>
-                      <td>{rep.comision}</td>
-                      <td>
-                        <button className="btn-action blue" onClick={() => handleView(rep.id)}>
-                          <Eye size={18} />
-                        </button>
-                        <button className="btn-action yellow" onClick={() => handleEdit(rep.id)}>
-                          <Edit2 size={18} />
-                        </button>
-                        <button className="btn-action red" onClick={() => handleDelete(rep.id)}>
-                          <Trash2 size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Modal */}
-          {showForm && (
-            <div className="modal-overlay">
-              <div className="modal">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                  <h2>{editingId ? "Editar Representante" : "Nuevo Representante"}</h2>
-                  <button 
-                    onClick={() => {
-                      setShowForm(false);
-                      setEditingId(null);
-                    }} 
-                    style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
-
-                <form onSubmit={handleFormSubmit} className="form-grid">
-                  <label>Código Interno *</label>
-                  <input 
-                    name="codigo_interno" 
-                    value={formData.codigo_interno} 
-                    onChange={handleInputChange} 
-                    required 
-                    disabled={!!editingId}
-                    placeholder="Ej: REP001"
-                  />
-
-                  <label>Nombre Completo *</label>
-                  <input 
-                    name="nombre" 
-                    value={formData.nombre} 
-                    onChange={handleInputChange} 
-                    required 
-                    placeholder="Ej: Carlos Mendoza"
-                  />
-
-                  <label>Teléfono *</label>
-                  <input 
-                    name="telefono" 
-                    value={formData.telefono} 
-                    onChange={handleInputChange} 
-                    required 
-                    placeholder="Ej: +34 600 123 456"
-                  />
-
-                  <label>Email *</label>
-                  <input 
-                    type="email" 
-                    name="email" 
-                    value={formData.email} 
-                    onChange={handleInputChange} 
-                    required 
-                    placeholder="Ej: carlos@belgem.com"
-                  />
-
-                  <label>Zona *</label>
-                  <input 
-                    name="zona" 
-                    value={formData.zona} 
-                    onChange={handleInputChange} 
-                    required 
-                    placeholder="Ej: Barcelona"
-                  />
-
-                  <label>Comisión</label>
-                  <input 
-                    type="number" 
-                    step="0.01" 
-                    name="comision" 
-                    value={formData.comision} 
-                    onChange={handleInputChange}
-                    placeholder="Ej: 12.50"
-                  />
-
-                  <div className="form-buttons">
-                    <button
-                      type="button"
-                      className="btn-cancel"
-                      onClick={() => {
-                        setShowForm(false);
-                        setEditingId(null);
-                      }}
-                    >
-                      Cancelar
-                    </button>
-
-                    <button type="submit" className="btn-blue">
-                      {editingId ? 'Actualizar' : 'Guardar'} Representante
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-        </main>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
+        <button onClick={handleCancel} disabled={loading}
+          style={{ padding: '8px 24px', border: '1px solid #e2e8f0', borderRadius: '6px', color: '#374151', backgroundColor: 'white', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: '500', opacity: loading ? 0.6 : 1 }}>
+          Cancelar
+        </button>
+        <button onClick={handleSave} disabled={loading}
+          style={{ padding: '8px 24px', backgroundColor: loading ? '#94a3b8' : '#1d4ed8', color: 'white', border: 'none', borderRadius: '8px', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: '500', opacity: loading ? 0.6 : 1 }}>
+          {loading ? 'Guardando...' : 'Guardar Cambios'}
+        </button>
       </div>
     </div>
   );
-}
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', fontFamily: "'Inter', system-ui, sans-serif" }}>
+
+      {/* HEADER */}
+      <header style={{
+        backgroundColor: 'white',
+        borderBottom: '1px solid #e5e7eb',
+        padding: '16px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexShrink: 0
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {viewMode !== 'list' && (
+            <button onClick={handleCancel} style={{ padding: '6px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', borderRadius: '4px', display: 'inline-flex', alignItems: 'center' }}>
+              <X size={20} />
+            </button>
+          )}
+          <h1 style={{ fontSize: '17px', fontWeight: '700', color: '#0f172a', margin: 0 }}>{getTitle()}</h1>
+        </div>
+        <ProfileButton />
+      </header>
+
+      {/* CONTENT */}
+      <div style={{ flex: 1, overflow: 'auto', padding: '24px', backgroundColor: '#f8fafc' }}>
+        {error && viewMode === 'list' && <ErrorAlert message={error} />}
+
+        {loading && viewMode === 'list' ? (
+          <LoadingSpinner />
+        ) : viewMode === 'list' ? (
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
+              <div style={{ position: 'relative', flexGrow: 1, minWidth: '250px' }}>
+                <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                <input type="text" placeholder="Buscar representantes..." value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ paddingLeft: '40px', paddingTop: '8px', paddingBottom: '8px', paddingRight: '16px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
+              </div>
+              <button onClick={handleNew}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#1d4ed8', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap' }}>
+                <Plus size={20} /> Nuevo Representante
+              </button>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
+                <thead style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                  <tr>
+                    {['ID', 'Código Interno', 'Nombre', 'Email', 'Teléfono', 'Zona', 'Comisión', 'Acciones'].map(h => (
+                      <th key={h} style={{ padding: '11px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.6px' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRepresentantes.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>No se encontraron representantes</td>
+                    </tr>
+                  ) : (
+                    filteredRepresentantes.map((rep) => (
+                      <tr key={rep.id} onClick={() => handleViewRep(rep)}
+                        style={{ borderBottom: '1px solid #f1f5f9', cursor: 'pointer' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                        <td style={{ padding: '13px 20px', fontSize: '13.5px' }}>{rep.id}</td>
+                        <td style={{ padding: '13px 20px', fontSize: '13.5px', fontWeight: '500' }}>{rep.internalCode}</td>
+                        <td style={{ padding: '13px 20px', fontSize: '13.5px', fontWeight: '500' }}>{rep.name}</td>
+                        <td style={{ padding: '13px 20px', fontSize: '13.5px' }}>{rep.email || '-'}</td>
+                        <td style={{ padding: '13px 20px', fontSize: '13.5px' }}>{rep.phone}</td>
+                        <td style={{ padding: '13px 20px', fontSize: '13.5px' }}>{rep.zone}</td>
+                        <td style={{ padding: '13px 20px', fontSize: '13.5px' }}>{rep.commission ?? '-'}</td>
+                        <td style={{ padding: '13px 20px' }} onClick={(e) => e.stopPropagation()}>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => handleViewRep(rep)} style={{ padding: '8px', color: '#059669', background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer' }} title="Ver"><Eye size={16} /></button>
+                            <button onClick={() => handleEdit(rep)} style={{ padding: '8px', color: '#4f46e5', background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer' }} title="Editar"><Edit2 size={16} /></button>
+                            <button onClick={() => handleDelete(rep)} style={{ padding: '8px', color: '#dc2626', background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer' }} title="Eliminar"><Trash2 size={16} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : viewMode === 'view' ? (
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', padding: '32px', maxWidth: '896px' }}>
+            {loading ? <LoadingSpinner /> : (
+              <>
+                <div style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '2px solid #e5e7eb' }}>
+                  <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>{selectedRep?.name}</h2>
+                  <span style={{ padding: '6px 12px', fontSize: '14px', fontWeight: '600', borderRadius: '9999px', backgroundColor: '#dbeafe', color: '#2563eb' }}>Representante</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+                  {[
+                    { label: 'ID Representante', value: selectedRep?.id },
+                    { label: 'Código Interno', value: selectedRep?.internalCode },
+                    { label: 'Email', value: selectedRep?.email },
+                    { label: 'Teléfono', value: selectedRep?.phone },
+                    { label: 'Zona', value: selectedRep?.zone },
+                    { label: 'Comisión', value: selectedRep?.commission }
+                  ].map(({ label, value }) => (
+                    <div key={label}>
+                      <h3 style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.6px' }}>{label}</h3>
+                      <p style={{ fontSize: '15px', margin: 0, color: '#1e293b' }}>{value ?? '-'}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
+                  <button onClick={handleCancel} style={{ padding: '8px 24px', border: '1px solid #e2e8f0', borderRadius: '6px', color: '#374151', backgroundColor: 'white', cursor: 'pointer', fontWeight: '500' }}>Volver</button>
+                  <button onClick={() => handleEdit(selectedRep)} style={{ padding: '7px 14px', backgroundColor: '#1d4ed8', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', fontSize: '13px' }}>Editar Representante</button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : renderForm()}
+      </div>
+    </div>
+  );
+};
+
+export default RepresentantesPage;

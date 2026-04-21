@@ -5,7 +5,7 @@
  * Base URL: Asegúrate de configurar la URL correcta de tu backend
  */
 
-const API_BASE_URL = 'http://localhost:8080/clientes';
+const API_BASE_URL = '/api/v1/clientes';
 
 /**
  * Configuración común para las peticiones fetch
@@ -23,12 +23,12 @@ const handleResponse = async (response) => {
     const errorText = await response.text();
     throw new Error(`Error ${response.status}: ${errorText || response.statusText}`);
   }
-  
+
   // Si la respuesta es 204 No Content (típico en DELETE), no hay JSON
   if (response.status === 204) {
     return null;
   }
-  
+
   return response.json();
 };
 
@@ -36,7 +36,7 @@ const handleResponse = async (response) => {
  * Servicio de Cliente - Operaciones CRUD
  */
 const ClienteService = {
-  
+
   /**
    * Obtener todos los clientes
    * GET /clientes
@@ -102,7 +102,7 @@ const ClienteService = {
         headers: getHeaders(),
         body: JSON.stringify(requestBody)
       });
-      
+
       return await handleResponse(response);
     } catch (error) {
       console.error('Error al crear cliente:', error);
@@ -138,7 +138,7 @@ const ClienteService = {
         headers: getHeaders(),
         body: JSON.stringify(requestBody)
       });
-      
+
       return await handleResponse(response);
     } catch (error) {
       console.error(`Error al actualizar cliente con ID ${id}:`, error);
@@ -158,7 +158,7 @@ const ClienteService = {
         method: 'DELETE',
         headers: getHeaders()
       });
-      
+
       return await handleResponse(response);
     } catch (error) {
       console.error(`Error al eliminar cliente con ID ${id}:`, error);
@@ -173,7 +173,7 @@ const ClienteService = {
  */
 export const mapClienteFromBackend = (cliente) => {
   if (!cliente) return null;
-  
+
   return {
     id: cliente.idCliente,
     nombre: cliente.nombre,

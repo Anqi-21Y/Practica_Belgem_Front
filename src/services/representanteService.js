@@ -1,9 +1,11 @@
 /**
  * Servicio para gestionar las operaciones CRUD de representantes
  * mediante comunicación con el backend REST API.
+ * 
+ * Base URL: /api/v1/representantes
  */
 
-const API_BASE_URL = 'http://localhost:8080/api/representantes'; // ⬅️ RUTA CORRECTA
+const API_BASE_URL = '/api/v1/representantes';
 
 /**
  * Configuración común para las peticiones fetch
@@ -21,11 +23,12 @@ const handleResponse = async (response) => {
     const errorText = await response.text();
     throw new Error(`Error ${response.status}: ${errorText || response.statusText}`);
   }
-  
+
+  // Si la respuesta es 204 No Content (típico en DELETE), no hay JSON
   if (response.status === 204) {
     return null;
   }
-  
+
   return response.json();
 };
 
@@ -33,10 +36,11 @@ const handleResponse = async (response) => {
  * Servicio de Representante - Operaciones CRUD
  */
 const RepresentanteService = {
-  
+
   /**
    * Obtener todos los representantes
    * GET /representantes
+   * @returns {Promise<Array>} Lista de representantes
    */
   listarRepresentantes: async () => {
     try {
@@ -54,6 +58,8 @@ const RepresentanteService = {
   /**
    * Obtener un representante por ID
    * GET /representantes/{id}
+   * @param {number} id - ID del representante
+   * @returns {Promise<Object>} Datos del representante
    */
   obtenerRepresentantePorId: async (id) => {
     try {
@@ -71,16 +77,18 @@ const RepresentanteService = {
   /**
    * Crear un nuevo representante
    * POST /representantes
+   * @param {Object} representanteData - Datos del representante a crear
+   * @returns {Promise<Object>} Representante creado
    */
   crearRepresentante: async (representanteData) => {
     try {
       const requestBody = {
-        name: representanteData.nombre,
-        phone: representanteData.telefono || '',
-        email: representanteData.email || '',
-        zone: representanteData.zona || '',
-        internalCode: representanteData.codigo_interno,
-        commission: parseFloat(representanteData.comision) || 0
+        name: representanteData.name,
+        phone: representanteData.phone,
+        email: representanteData.email || null,
+        zone: representanteData.zone,
+        internalCode: representanteData.internalCode,
+        commission: representanteData.commission ? Number(representanteData.commission) : null
       };
 
       const response = await fetch(API_BASE_URL, {
@@ -88,7 +96,7 @@ const RepresentanteService = {
         headers: getHeaders(),
         body: JSON.stringify(requestBody)
       });
-      
+
       return await handleResponse(response);
     } catch (error) {
       console.error('Error al crear representante:', error);
@@ -99,16 +107,19 @@ const RepresentanteService = {
   /**
    * Actualizar un representante existente
    * PUT /representantes/{id}
+   * @param {number} id - ID del representante a actualizar
+   * @param {Object} representanteData - Datos actualizados del representante
+   * @returns {Promise<Object>} Representante actualizado
    */
   actualizarRepresentante: async (id, representanteData) => {
     try {
       const requestBody = {
-        name: representanteData.nombre,
-        phone: representanteData.telefono || '',
-        email: representanteData.email || '',
-        zone: representanteData.zona || '',
-        internalCode: representanteData.codigo_interno,
-        commission: parseFloat(representanteData.comision) || 0
+        name: representanteData.name,
+        phone: representanteData.phone,
+        email: representanteData.email || null,
+        zone: representanteData.zone,
+        internalCode: representanteData.internalCode,
+        commission: representanteData.commission ? Number(representanteData.commission) : null
       };
 
       const response = await fetch(`${API_BASE_URL}/${id}`, {
@@ -116,7 +127,7 @@ const RepresentanteService = {
         headers: getHeaders(),
         body: JSON.stringify(requestBody)
       });
-      
+
       return await handleResponse(response);
     } catch (error) {
       console.error(`Error al actualizar representante con ID ${id}:`, error);
@@ -127,6 +138,8 @@ const RepresentanteService = {
   /**
    * Eliminar un representante
    * DELETE /representantes/{id}
+   * @param {number} id - ID del representante a eliminar
+   * @returns {Promise<void>}
    */
   eliminarRepresentante: async (id) => {
     try {
@@ -134,30 +147,13 @@ const RepresentanteService = {
         method: 'DELETE',
         headers: getHeaders()
       });
-      
+
       return await handleResponse(response);
     } catch (error) {
       console.error(`Error al eliminar representante con ID ${id}:`, error);
       throw error;
     }
   }
-};
-
-/**
- * Función auxiliar para mapear la respuesta del backend al formato del frontend
- */
-export const mapRepresentanteFromBackend = (representante) => {
-  if (!representante) return null;
-  
-  return {
-    id: representante.id, // ID de la base de datos
-    nombre: representante.name,
-    telefono: representante.phone,
-    email: representante.email,
-    zona: representante.zone,
-    codigo_interno: representante.internalCode,
-    comision: representante.commission?.toString() || '0'
-  };
 };
 
 export default RepresentanteService;
