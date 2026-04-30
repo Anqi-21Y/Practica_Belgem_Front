@@ -1,10 +1,8 @@
 /**
  * Servicio para gestionar las operaciones CRUD de pedidos
  * mediante comunicación con el backend REST API.
- * 
- * Base URL: Asegúrate de configurar la URL correcta de tu backend
+ * * Base URL: Asegúrate de configurar la URL correcta de tu backend
  */
-
 const API_BASE_URL = '/api/v1/pedidos';
 
 /**
@@ -82,11 +80,13 @@ const PedidosService = {
      */
     crearPedido: async (pedidoData) => {
         try {
-            // Mapear campos del frontend al formato esperado por el backend
+            // Mapear campos del frontend al formato esperado por Pedido.java (camelCase)
             const requestBody = {
-                clienteId: pedidoData.cliente_id,
-                representanteId: pedidoData.representante_id,
+                clienteId: Number(pedidoData.cliente_id),
+                representanteId: Number(pedidoData.representante_id),
+                fecha: pedidoData.fecha.includes('T') ? pedidoData.fecha : `${pedidoData.fecha}T00:00:00`,
                 estado: pedidoData.estado || 'CREADO',
+                total: parseFloat(pedidoData.total || 0),
                 observaciones: pedidoData.observaciones || ''
             };
 
@@ -113,8 +113,8 @@ const PedidosService = {
     actualizarPedido: async (id, pedidoData) => {
         try {
             const requestBody = {
-                clienteId: pedidoData.cliente_id,
-                representanteId: pedidoData.representante_id,
+                clienteId: Number(pedidoData.cliente_id),
+                representanteId: Number(pedidoData.representante_id),
                 estado: pedidoData.estado,
                 observaciones: pedidoData.observaciones || ''
             };
@@ -180,10 +180,12 @@ const PedidosService = {
      */
     crearDetalle: async (pedidoId, detalleData) => {
         try {
+            // Mapear campos al formato de PedidoDetalle.java
             const requestBody = {
-                articuloId: detalleData.articulo_id,
-                cantidad: detalleData.cantidad,
-                precioUnitario: detalleData.precio_unitario
+                pedidoId: pedidoId,
+                articuloId: Number(detalleData.articulo_id),
+                cantidad: parseInt(detalleData.cantidad),
+                precioUnitario: parseFloat(detalleData.precio_unitario)
             };
 
             const response = await fetch(`${API_BASE_URL}/${pedidoId}/detalles`, {
@@ -195,26 +197,6 @@ const PedidosService = {
             return await handleResponse(response);
         } catch (error) {
             console.error('Error al crear detalle de pedido:', error);
-            throw error;
-        }
-    },
-
-    /**
-     * Eliminar detalle de pedido
-     * DELETE /pedidos/detalles/{detalleId}
-     * @param {number} detalleId - ID del detalle a eliminar
-     * @returns {Promise<void>}
-     */
-    eliminarDetalle: async (detalleId) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/detalles/${detalleId}`, {
-                method: 'DELETE',
-                headers: getHeaders()
-            });
-
-            return await handleResponse(response);
-        } catch (error) {
-            console.error(`Error al eliminar detalle ${detalleId}:`, error);
             throw error;
         }
     }
@@ -231,7 +213,7 @@ export const mapPedidoFromBackend = (pedido) => {
         id: pedido.id,
         cliente_id: pedido.clienteId,
         representante_id: pedido.representanteId,
-        fecha: pedido.fecha ? new Date(pedido.fecha) : null,
+        fecha: pedido.fecha,
         estado: pedido.estado,
         total: parseFloat(pedido.total) || 0,
         observaciones: pedido.observaciones

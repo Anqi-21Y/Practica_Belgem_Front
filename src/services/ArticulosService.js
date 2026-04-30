@@ -37,8 +37,6 @@ export const ArticulosService = {
 
   /**
    * Obtener todos los artículos
-   * GET /articulos
-   * @returns {Promise<Array>} Lista de artículos
    */
   getAll: async () => {
     try {
@@ -55,9 +53,6 @@ export const ArticulosService = {
 
   /**
    * Obtener un artículo por ID
-   * GET /articulos/{id}
-   * @param {number} id - ID del artículo
-   * @returns {Promise<Object>} Datos del artículo
    */
   getById: async (id) => {
     try {
@@ -73,37 +68,20 @@ export const ArticulosService = {
   },
 
   /**
-   * Buscar artículos por nombre
-   * GET /articulos/buscar?nombre={nombre}
-   * @param {string} nombre - Nombre a buscar
-   * @returns {Promise<Array>} Lista de artículos que coinciden
-   */
-  searchByName: async (nombre) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/buscar?nombre=${encodeURIComponent(nombre)}`, {
-        method: 'GET',
-        headers: getHeaders()
-      });
-      return await handleResponse(response);
-    } catch (error) {
-      console.error('Error al buscar artículos:', error);
-      throw error;
-    }
-  },
-
-  /**
    * Crear un nuevo artículo
-   * POST /articulos
-   * @param {Object} articuloData - Datos del artículo a crear
-   * @returns {Promise<Object>} Artículo creado
+   * Alineado con el constructor de Articulo.java
    */
   create: async (articuloData) => {
     try {
       const requestBody = {
         nombre: articuloData.nombre,
-        cantidad: parseInt(articuloData.cantidad) || 0,
-        dto: parseFloat(articuloData.dto) || 0,
-        precio: parseFloat(articuloData.precio) || 0
+        situacion: articuloData.situacion || 'ACTIVO',
+        pvpMinimo: parseFloat(articuloData.pvpMinimo) || 0,
+        pesoKg: parseFloat(articuloData.pesoKg) || 0,
+        altoCm: parseFloat(articuloData.altoCm) || 0,
+        anchoCm: parseFloat(articuloData.anchoCm) || 0,
+        largoCm: parseFloat(articuloData.largoCm) || 0,
+        vendible: articuloData.vendible ?? true
       };
 
       const response = await fetch(API_BASE_URL, {
@@ -121,18 +99,18 @@ export const ArticulosService = {
 
   /**
    * Actualizar un artículo existente
-   * PUT /articulos/{id}
-   * @param {number} id - ID del artículo a actualizar
-   * @param {Object} articuloData - Datos actualizados del artículo
-   * @returns {Promise<Object>} Artículo actualizado
    */
   update: async (id, articuloData) => {
     try {
       const requestBody = {
         nombre: articuloData.nombre,
-        cantidad: parseInt(articuloData.cantidad) || 0,
-        dto: parseFloat(articuloData.dto) || 0,
-        precio: parseFloat(articuloData.precio) || 0
+        situacion: articuloData.situacion,
+        pvpMinimo: parseFloat(articuloData.pvpMinimo),
+        pesoKg: parseFloat(articuloData.pesoKg),
+        altoCm: parseFloat(articuloData.altoCm),
+        anchoCm: parseFloat(articuloData.anchoCm),
+        largoCm: parseFloat(articuloData.largoCm),
+        vendible: articuloData.vendible
       };
 
       const response = await fetch(`${API_BASE_URL}/${id}`, {
@@ -150,9 +128,6 @@ export const ArticulosService = {
 
   /**
    * Eliminar un artículo
-   * DELETE /articulos/{id}
-   * @param {number} id - ID del artículo a eliminar
-   * @returns {Promise<void>}
    */
   delete: async (id) => {
     try {
@@ -170,7 +145,8 @@ export const ArticulosService = {
 };
 
 /**
- * Función auxiliar para mapear la respuesta del backend al formato del frontend
+ * Mapeo exacto basado en Articulo.java
+ * Aquí es donde conviertes lo que viene del back a lo que usa el front
  */
 export const mapArticuloFromBackend = (articulo) => {
   if (!articulo) return null;
@@ -178,9 +154,13 @@ export const mapArticuloFromBackend = (articulo) => {
   return {
     id: articulo.id,
     nombre: articulo.nombre,
-    cantidad: articulo.cantidad,
-    dto: articulo.dto,
-    precio: articulo.precio
+    situacion: articulo.situacion,
+    pvpMinimo: articulo.pvpMinimo || 0,
+    pesoKg: articulo.pesoKg || 0,
+    altoCm: articulo.altoCm || 0,
+    anchoCm: articulo.anchoCm || 0,
+    largoCm: articulo.largoCm || 0,
+    vendible: articulo.vendible ?? true
   };
 };
 
